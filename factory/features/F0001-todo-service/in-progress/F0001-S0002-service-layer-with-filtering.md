@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:19:20.317843Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-11-01T13:19:20.317843Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:20:06.820667Z'
+  stage: tests
+  run: 3de18135c9394c568f5a7dc3251054af
 ---
 
 # Service layer with filtering
@@ -135,3 +137,26 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    Architecture: the service depends on the repository protocol only, and tests may import the in-memory repository. This matches the layering in CLAUDE.md, and `make layers` enforces it.
    Scope: the story covers feature decisions 5 and 17 and the feature's service-layer scope bullet. It adds no API, no persistence and no sorting beyond creation order, so it stays out of "Out of scope".
 4. factory: started tests as demo.
+5. tester: Wrote the service tests from the Interface and criteria 1–15, using `InMemoryTodoRepository` as the concrete repository. Two fixtures: a service on a fixed clock (`NOON`) and one on a clock that ticks a minute per call, used where creation order has to be visible (criteria 4 and 5).
+   criterion 1: tests/service/test_todo_service.py::test_create_strips_the_title_and_stamps_the_clock_time
+   criterion 2: tests/service/test_todo_service.py::test_create_with_a_blank_title_is_rejected_and_stores_nothing
+   criterion 3: tests/service/test_todo_service.py::test_get_with_an_unknown_id_raises_not_found
+   criterion 4: tests/service/test_todo_service.py::test_list_returns_every_todo_in_creation_order
+   criterion 5: tests/service/test_todo_service.py::test_list_filters_by_the_done_flag_in_creation_order (rows done=True, done=False, done=None over four alternately created todos)
+   criterion 6: tests/service/test_todo_service.py::test_rename_changes_only_the_title (renames a completed todo, so a reset done flag would be caught)
+   criterion 7: tests/service/test_todo_service.py::test_rename_with_a_blank_title_is_rejected_and_keeps_the_old_title
+   criterion 8: tests/service/test_todo_service.py::test_complete_marks_the_todo_done
+   criterion 9: tests/service/test_todo_service.py::test_complete_on_a_completed_todo_keeps_it_done
+   criterion 10: tests/service/test_todo_service.py::test_reopen_marks_the_todo_open
+   criterion 11: tests/service/test_todo_service.py::test_reopen_on_an_open_todo_keeps_it_open
+   criterion 12: tests/service/test_todo_service.py::test_delete_removes_the_todo
+   criterion 13: tests/service/test_todo_service.py::test_changing_an_unknown_todo_raises_not_found (rows rename, complete, reopen, delete)
+   criterion 14: tests/service/test_todo_service.py::test_utc_now_is_the_current_time_in_utc
+   criterion 15: tests/service/test_todo_service.py::test_service_without_a_clock_stamps_the_current_utc_time
+   Criteria 16 (`make check`) and 17 (docs) are not tests.
+   Files created: tests/service/__init__.py, tests/service/test_todo_service.py.
+   Module the test run could not import: `app.service.todo_service`. `make test` shows a collection ImportError for tests/service/test_todo_service.py, and the 61 earlier tests pass. `make lint` is green.
+   I did not move the `T0` constant from tests/repository/test_contract.py to a shared place. A one-line datetime value isn't a shared helper, so this file defines its own `NOON`. No earlier test files were changed.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 61 passed, 1 error in 0.79s
