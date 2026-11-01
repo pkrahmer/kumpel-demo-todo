@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: demo
+  stage: intake
+  started_at: '2026-11-01T13:29:55.457920Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-11-01T13:29:55.453830Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:29:55.457920Z'
+  stage: intake
+---
+
 # HTTP API
 
 ## Description
@@ -122,3 +149,6 @@ curl -s localhost:8765/todos/$ID; echo
 Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`; then `[]`; then `{"detail":"title must not be blank"}`; then `204`; then `{"detail":"todo <the same id> not found"}`.
 
 ## Journal
+
+1. 2026-11-01 human: created.
+2. factory: started intake as demo.
