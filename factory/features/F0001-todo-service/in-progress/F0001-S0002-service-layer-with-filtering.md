@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:23:52.628349Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -80,6 +84,11 @@ journal:
   at: '2026-11-01T13:23:32.782421Z'
   stage: tests
   run: cd2ded1be358414fa37af8447b6486b1
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:23:52.628349Z'
+  stage: doing
 ---
 
 # Service layer with filtering
@@ -268,3 +277,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
     `lint`: lint: green (0.0 s)
     `test`: test: green (1.4 s)
+14. factory: started doing as demo.
