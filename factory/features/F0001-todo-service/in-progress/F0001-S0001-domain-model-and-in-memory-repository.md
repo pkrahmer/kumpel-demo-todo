@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:12:02.581630Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -133,6 +129,12 @@ journal:
   kind: started
   at: '2026-11-01T13:12:02.581630Z'
   stage: doing
+- number: 23
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:12:36.452732Z'
+  stage: doing
+  run: b9f700d3ce314d019cdee34e7147c2a1
 ---
 
 # Domain model and in-memory repository
@@ -500,3 +502,28 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     `lint`: lint: green (0.0 s)
     `test`: test: green (1.5 s)
 22. factory: started doing as demo.
+23. coder: Round 2, after the tester's change: I changed no code. The only finding in this round was the reviewer's criterion 24 (entry 17). The tester covered it in entry 21 with the `tzinfo-without-offset` rows in `tests/domain/test_model.py::test_naive_created_at_is_rejected`, so nothing is left for the coder to do.
+
+    Built: nothing new this round. The code from entry 7 is unchanged:
+    - `src/app/domain/__init__.py`
+    - `src/app/domain/errors.py`
+    - `src/app/domain/model.py`
+    - `src/app/domain/repository.py`
+    - `src/app/repository/__init__.py`
+    - `src/app/repository/memory.py`
+
+    The check in `_as_utc` (`src/app/domain/model.py`), `moment.tzinfo is None or moment.utcoffset() is None`, already raises `ValueError` for the new rows.
+
+    Check: I ran `make check` on the current tree and it is green: 61 tests pass and coverage is 100 %. mypy accepts the test's `_NoOffset` tzinfo under `--strict`.
+
+    Main choice: send the work item on to review without touching the source. The finding only needed a test, and that test now exists. Rejected: another refactor pass over the source. That would go beyond this round's findings, and the reviewer found nothing in the code.
+
+    Description: entry 17 added criterion 24 and renumbered the closing two to 25 and 26, and the Description already shows this. The meaning of the task is otherwise unchanged, so I left `## Description` alone.
+
+    Noticed, not touched:
+    - `T0` is defined twice, and there are similar todo builders in `tests/domain/test_model.py` and `tests/repository/test_contract.py`. These are the reviewer's notes from entry 17, not findings. Moving them would be the tester's job under the standing leave.
+    - `docs/` does not exist yet. Criterion 26 belongs to the documenter.
+    - No route or schema exists yet, so I did not run `make openapi`.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
