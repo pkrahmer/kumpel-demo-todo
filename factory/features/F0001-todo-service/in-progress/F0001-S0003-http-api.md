@@ -1,11 +1,11 @@
 ---
 stage: intake
-blocked: question
+blocked: null
 round: 0
 attempts: 0
 crashes: 0
 pull_request: 3
-comments_read: []
+comments_read: [6558637547]
 handed_over: null
 claim: null
 journal:
@@ -26,6 +26,11 @@ journal:
   stage: intake
   run: 085fc987f31946dfa603100e12c56b3c
   blocked: question
+- number: 4
+  speaker: human
+  kind: comment
+  at: '2026-11-01T13:32:44.265454Z'
+  stage: intake
 ---
 
 # HTTP API
@@ -165,3 +170,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Smoke test: runnable, and its `Expect:` line is checkable. It runs no pytest, so the `-q` rule does not apply.
    - Architecture: the layering fits, and only `main` imports `app.repository`.
    - Scope: within the feature, and `make openapi` exists in the Makefile.
+4. 2026-11-01 human: Yes, as you propose: add the criterion `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`, placed before the two closing criteria. It follows from the Interface's rule that every title is checked after stripping.
