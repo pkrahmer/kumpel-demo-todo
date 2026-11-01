@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: docs
+  started_at: '2026-11-01T13:41:51.261350Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -119,6 +123,11 @@ journal:
   at: '2026-11-01T13:41:31.175193Z'
   stage: review
   run: 39ac13020f634e03a6ae9694f20e08d8
+- number: 21
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:41:51.261350Z'
+  stage: docs
 ---
 
 # HTTP API
@@ -431,3 +440,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. `_imported_modules` moved to `tests/imports.py` as `imported_modules`. For files under `app/domain` it gives the same package prefix as before. The test keeps its name and checks the same thing.
     - `tests/service/test_todo_service.py`: changed under the same standing leave. `_ticking_clock` moved to `tests/fakes.py` as `ticking_clock`. Every test keeps its name and checks the same thing.
     - `tests/fakes.py`: changed under the same standing leave. It is the shared place, and the only change is the added `ticking_clock`.
+21. factory: started docs as demo.
