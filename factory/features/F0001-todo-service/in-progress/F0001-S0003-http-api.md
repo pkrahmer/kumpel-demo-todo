@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:35:27.412919Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -53,6 +57,11 @@ journal:
   at: '2026-11-01T13:35:07.306030Z'
   stage: tests
   run: 8dac314487e248a3b4c6ff0b15e2a7cd
+- number: 9
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:35:27.412919Z'
+  stage: doing
 ---
 
 # HTTP API
@@ -247,3 +256,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 81 passed, 4 warnings, 2 errors in 1.44s
+9. factory: started doing as demo.
