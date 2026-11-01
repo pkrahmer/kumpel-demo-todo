@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:23:52.628349Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -89,6 +85,12 @@ journal:
   kind: started
   at: '2026-11-01T13:23:52.628349Z'
   stage: doing
+- number: 15
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:24:19.374721Z'
+  stage: doing
+  run: 7ef7e22aa6834ae3bac1b00e203f5972
 ---
 
 # Service layer with filtering
@@ -278,3 +280,17 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     `lint`: lint: green (0.0 s)
     `test`: test: green (1.4 s)
 14. factory: started doing as demo.
+15. coder: Round 1, after the tester's move. The reviewer's only finding (entry 9) was the third copy of a test constant. The tester fixed it in entry 13: `T0` now lives once in `tests/fakes.py`, and `tests/domain/test_model.py`, `tests/repository/test_contract.py` and `tests/service/test_todo_service.py` import it from there. That leaves no code to change this round, and I changed none.
+
+    Built: nothing new. The service layer from entry 7 is unchanged: `src/app/service/__init__.py` and `src/app/service/todo_service.py`, with `Clock`, `utc_now` and `TodoService`.
+
+    Main choice: I hand the work item back to review without touching the code. The alternative was to look for more changes, and I rejected it: on a rework round I address only the latest findings, and those are closed.
+
+    Refactor pass: there is no new diff this round, so I had nothing to refactor.
+
+    Noticed, not touched: the docs criterion (17, `docs/project-guide.md`) is still open; it belongs to the documenter. The journal did not change the meaning of the description.
+
+    `check`: check: green (81 passed, 100% coverage)
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
