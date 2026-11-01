@@ -11,7 +11,7 @@ make check    # everything the pipeline checks: lint, types, layers, static anal
 
 ## Where to look next
 
-- `docs/project-guide.md`: the layers and their reasons, the domain model, the repository protocol
+- `docs/project-guide.md`: the layers and their reasons, the domain model, the repository protocol, the service
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
 
 ## How it is built

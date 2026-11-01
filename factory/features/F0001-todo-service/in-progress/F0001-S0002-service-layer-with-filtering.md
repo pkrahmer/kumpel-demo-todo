@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: docs
-  started_at: '2026-11-01T13:25:29.050117Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -111,6 +107,12 @@ journal:
   kind: started
   at: '2026-11-01T13:25:29.050117Z'
   stage: docs
+- number: 19
+  speaker: documenter
+  kind: result
+  at: '2026-11-01T13:25:58.770653Z'
+  stage: docs
+  run: 946d7d7a41c94b5c99440dc4a30b2bca
 ---
 
 # Service layer with filtering
@@ -336,3 +338,16 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     - `tests/domain/test_model.py`: changed under the standing leave in `CLAUDE.md` to move a shared test helper. Only the local `T0` and the now-unused `UTC` import were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
     - `tests/repository/test_contract.py`: changed under the same standing leave. Only the local `T0` and the now-unused `UTC` and `datetime` imports were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
 18. factory: started docs as demo.
+19. documenter: Docs round 1. Only documents changed, so I did not run `make check`; the factory's run decides.
+
+    Files changed:
+    - `docs/project-guide.md`: added a "Service" section (criterion 17). It covers the use cases, the clock (`Clock`, `utc_now`, injectable, read only by `create`), the done filter (done in memory over `list_all()`, so the protocol has no filter and a later SQL repository loads every row first), error pass-through, and that storage is reached only through the repository protocol (`make layers`). It also notes `tests/fakes.py` and the in-memory repository in the tests. I rewrote the intro sentence that said the service did not exist yet.
+    - `README.md`: the "Where to look next" line for the project guide now lists the service.
+
+    Cross-read and found current: `CLAUDE.md` (layers, Docs, test rules) against the diff, and the layer table, domain model, errors and repository protocol sections of `docs/project-guide.md`. I ran the first smoke command and got the expected three lines. `docs/api.md`, `docs/decisions.md` and `docs/openapi.json` do not exist yet. The story adds no route or schema, so none is due.
+
+    Findings for the coder: none. The service matches the Interface, with signatures and docstrings as `CLAUDE.md` asks.
+
+    Stale text not touched: none seen. `CLAUDE.md` names `docs/api.md` and `docs/decisions.md`, which do not exist yet. That is expected before the API story.
+
+    `check`: check: green
