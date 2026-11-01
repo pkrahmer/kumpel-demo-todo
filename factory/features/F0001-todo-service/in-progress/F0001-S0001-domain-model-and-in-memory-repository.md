@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: smoke-test
-  started_at: '2026-11-01T13:14:59.269876Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -166,6 +162,12 @@ journal:
   kind: started
   at: '2026-11-01T13:14:59.269876Z'
   stage: smoke-test
+- number: 29
+  speaker: smoke-tester
+  kind: result
+  at: '2026-11-01T13:15:32.037292Z'
+  stage: smoke-test
+  run: aa895f4377d4489392d86df1f7bc3fc3
 ---
 
 # Domain model and in-memory repository
@@ -621,3 +623,26 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
     `check`: check: green
 28. factory: started smoke-test as demo.
+29. smoke-tester: Smoke test, round 2. I ran both commands under `## Smoke test` from the repository root, as written and in order. Neither starts a server. I fixed nothing.
+
+    Command 1 (in-memory repository: add, update, list_all):
+    ```
+    True 'Buy milk' 2026-10-04T12:00:00+00:00
+    False 'Write the next story' 2026-10-04T12:01:00+00:00
+    ```
+    Exit status 0. Met its `Expect:` line. There are two lines in creation order even though `b` was added first, the title is stripped, the update to done is kept, and the timestamps are UTC.
+
+    Command 2 (title rule):
+    ```
+    InvalidTitle - title must not be blank
+    InvalidTitle - title must be at most 200 characters
+    ```
+    Exit status 0. Met its `Expect:` line. Both lines match exactly, in order.
+
+    Criteria check: I read `## Acceptance criteria` again. The output agrees with criteria 1 (the new todo is not done and keeps `created_at`), 3 (strip through `Todo.new`), 4 and 5 (the exact messages), 6 (the UTC offset is shown as +00:00), 9 (`with_done`), 14, 18 and 20 (add, the oldest-first order, update). It contradicts none of them, including the ones the commands do not target.
+
+    For criterion 26 I checked only that `docs/project-guide.md` exists and covers the layers, including that service and repository never import each other, and the repository protocol, and that the README's *Where to look next* links it at `README.md:14`. I did not run `make check` (criterion 25): the stage does not ask for it, and the factory runs the checks.
+
+    Findings: none.
+
+    Open: nothing.
