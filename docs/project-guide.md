@@ -2,7 +2,7 @@
 
 For agents and contributors who change the code. The rules every change follows are in `CLAUDE.md`; this file explains the shape of the code and why.
 
-Only the domain, the in-memory repository and the service exist so far. The API layer described below is built by a later story.
+Only the domain, the in-memory repository, the service and the HTTP API exist so far. The API is described in `docs/api.md`; its code is in `src/app/api/` (`schemas`, `routes`, `errors`, `dependencies`, `app`, and `main` as the composition root).
 
 ## Layers
 

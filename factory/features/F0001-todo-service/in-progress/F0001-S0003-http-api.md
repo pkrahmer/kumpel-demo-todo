@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: docs
-  started_at: '2026-11-01T13:41:51.261350Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -128,6 +124,12 @@ journal:
   kind: started
   at: '2026-11-01T13:41:51.261350Z'
   stage: docs
+- number: 22
+  speaker: documenter
+  kind: result
+  at: '2026-11-01T13:42:34.202745Z'
+  stage: docs
+  run: f1a2267bfba44cebb933cae03dc87ef7
 ---
 
 # HTTP API
@@ -441,3 +443,17 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - `tests/service/test_todo_service.py`: changed under the same standing leave. `_ticking_clock` moved to `tests/fakes.py` as `ticking_clock`. Every test keeps its name and checks the same thing.
     - `tests/fakes.py`: changed under the same standing leave. It is the shared place, and the only change is the added `ticking_clock`.
 21. factory: started docs as demo.
+22. documenter: Docs, round 1. This is the first documentation pass for this story: docs/api.md did not exist, and the rework rounds so far were for the tests. I found no contradiction between the code and the Interface, so there are no findings.
+
+    Files changed (documents only, so I did not run `make check`; the factory's checks decide):
+    - `docs/api.md` (new): every endpoint with method, path, body and success/error statuses; the done filter; the title rules (strip, blank, 200/201); the PATCH rules (null counts as not set, empty body is 422, title first so a refused title changes nothing); the single error body `{"detail": "…"}` with its three cases; curl examples for create and list.
+    - `README.md`: Getting started now shows the uvicorn command and names `/docs`. Where to look next links `docs/api.md`.
+    - `docs/project-guide.md`: replaced the sentence "The API layer ... is built by a later story" with the current state and a pointer to `docs/api.md` and `src/app/api/`.
+
+    Examples run: I started the server with the uvicorn command and ran the two curl examples (create with a padded title returns the stripped `Buy milk`; `?done=false` lists it). `/docs` returned 200.
+
+    Cross-read and found current: the layer table, the domain model, title rules and service sections of `docs/project-guide.md` against the diff, and `docs/openapi.json` (generated, not touched; criterion 21 tests it).
+
+    Stale text I noticed and left: the README's opening paragraph says todos are "kept in memory or in a SQLite file". SQLite storage is not built yet, so for now only memory is true. I added a sentence in Getting started saying todos are in memory, but left the intro alone. A later storage story should correct it.
+
+    `check`: check: green

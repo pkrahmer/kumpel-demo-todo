@@ -7,10 +7,14 @@ A single-user to-do service with an HTTP API: create todos, list and filter them
 ```bash
 uv sync       # install
 make check    # everything the pipeline checks: lint, types, layers, static analysis, secrets, licences, tests
+uv run uvicorn app.api.main:app --port 8765    # start the server
 ```
+
+The interactive API schema is at <http://localhost:8765/docs>. Todos are kept in memory for now, so they are gone when the server stops.
 
 ## Where to look next
 
+- `docs/api.md`: the endpoints, the title and `PATCH` rules, the error body, curl examples (`docs/openapi.json` is the generated schema)
 - `docs/project-guide.md`: the layers and their reasons, the domain model, the repository protocol, the service
 - `CLAUDE.md`: the rules every change follows (architecture, tests, checks)
 
