@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:10:44.363401Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -122,6 +118,12 @@ journal:
   kind: started
   at: '2026-11-01T13:10:44.363401Z'
   stage: tests
+- number: 21
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:11:42.245376Z'
+  stage: tests
+  run: 33d9e90606624dffbf01e794850c8db8
 ---
 
 # Domain model and in-memory repository
@@ -461,3 +463,30 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     - `docs/` still doesn't exist; criterion 26 belongs to the documenter.
     - I didn't run `make check` this round because no source changed. It was green in entry 15.
 20. factory: started tests as demo.
+21. tester: Round 2: I wrote the test for criterion 24. The reviewer added that criterion in entry 17, and the coder's entry 19 sent it back to me. It touches only `tests/domain/test_model.py`, a module I wrote for this story. No other file changed.
+
+    Change:
+    - I added a module-level test `tzinfo`, `_NoOffset`. Its `utcoffset` returns `None`. It also implements `dst` and `tzname`, both returning `None`, because typeshed marks those two abstract and mypy would otherwise refuse to build the class.
+    - `test_naive_created_at_is_rejected` now has a second parametrization, `created_at`, next to the existing `build` one (constructor, new). It has two rows:
+      - `no-tzinfo`: the earlier datetime, unchanged (criterion 7).
+      - `tzinfo-without-offset`: `datetime(2026, 10, 4, 12, 0, tzinfo=_NoOffset())` (criterion 24).
+    - The test keeps its name and still checks `ValueError`, not `InvalidTitle`.
+
+    Mapping:
+    - criterion 7: tests/domain/test_model.py::test_naive_created_at_is_rejected (rows `no-tzinfo` × constructor, new)
+    - criterion 24: tests/domain/test_model.py::test_naive_created_at_is_rejected (rows `tzinfo-without-offset` × constructor, new)
+    - The rest of the mapping from entry 5 still holds. The closing two criteria, now 25 and 26, have no tests.
+
+    Files created: none. File changed: tests/domain/test_model.py.
+
+    Modules the test runner could not import: none. The code exists, so the new rows pass now (61 passed) instead of failing first. If `or moment.utcoffset() is None` were removed from `_as_utc`, `astimezone` would treat the datetime as local time and not raise, so the new rows would fail.
+
+    `make lint` is green. I also ran `mypy --strict` on this one file, outside the stage's steps, to catch the abstract-class error above. With the extra methods the only errors left were `import-untyped` for `app.domain`, which come from checking the file outside the project's mypy setup. The coder's `make check` is the real type check.
+
+    Rejected:
+    - Moving `T0` and the todo builders into a shared module under the standing leave. The reviewer gave it as a note, not a finding, and this run is only the approved change.
+
+    Open: nothing.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (1.5 s)

@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from dataclasses import FrozenInstanceError
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone, tzinfo
 from uuid import UUID
 
 import pytest
@@ -40,6 +40,17 @@ CREATED_AT_BUILDERS: list[Callable[[datetime], Todo]] = [
     _created_at_from_new,
 ]
 CREATED_AT_BUILDER_IDS = ["constructor", "new"]
+
+
+class _NoOffset(tzinfo):
+    def utcoffset(self, _dt: datetime | None, /) -> timedelta | None:
+        return None
+
+    def dst(self, _dt: datetime | None, /) -> timedelta | None:
+        return None
+
+    def tzname(self, _dt: datetime | None, /) -> str | None:
+        return None
 
 
 @pytest.fixture
@@ -109,9 +120,16 @@ def test_created_at_is_converted_to_utc(build: Callable[[datetime], Todo]) -> No
 
 
 @pytest.mark.parametrize("build", CREATED_AT_BUILDERS, ids=CREATED_AT_BUILDER_IDS)
-def test_naive_created_at_is_rejected(build: Callable[[datetime], Todo]) -> None:
+@pytest.mark.parametrize(
+    "created_at",
+    [datetime(2026, 10, 4, 12, 0), datetime(2026, 10, 4, 12, 0, tzinfo=_NoOffset())],
+    ids=["no-tzinfo", "tzinfo-without-offset"],
+)
+def test_naive_created_at_is_rejected(
+    build: Callable[[datetime], Todo], created_at: datetime
+) -> None:
     with pytest.raises(ValueError) as excinfo:
-        build(datetime(2026, 10, 4, 12, 0))
+        build(created_at)
 
     assert not isinstance(excinfo.value, InvalidTitle)
 
