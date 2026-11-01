@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:12:56.362827Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -144,6 +140,12 @@ journal:
   kind: started
   at: '2026-11-01T13:12:56.362827Z'
   stage: review
+- number: 25
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:13:38.780451Z'
+  stage: review
+  run: fcb49518dd0d4666aafa7dfbdf0ba364
 ---
 
 # Domain model and in-memory repository
@@ -537,3 +539,50 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
 24. factory: started review as demo.
+25. reviewer: Round 2 review of `git diff main...HEAD -- . ':!factory'` against the work item. The diff has no generated files or lock files to leave out. I read the full source and every test file; I did not run `make check`, as the stage says.
+
+    no findings
+
+    Group 1, acceptance criteria: passes. I went through criteria 1–24 and every rule in the Interface against the tests.
+    - The title rule is tested from the constructor, `new` and `with_title`:
+      - strip (criterion 3);
+      - blank, with its message (criterion 4);
+      - length at 1, 200 and 201 characters, each also padded, with the message (criterion 5).
+      The limit is tested on both sides as rows of one parametrized test.
+    - UTC conversion (criterion 6) and the naive `ValueError` (criteria 7 and 24) are tested from the constructor and `new`. Criterion 24 is now covered: `tests/domain/test_model.py:122-134` has a `tzinfo-without-offset` row, built with `_NoOffset` whose `utcoffset` returns `None`. Without the `utcoffset() is None` clause in `src/app/domain/model.py:51` that row would fail, because `astimezone` would treat the datetime as local time.
+    - Also covered:
+      - `with_title` and `with_done` return new todos and keep the original (criteria 8–9);
+      - the dataclass is frozen (criterion 10);
+      - the error ids, messages and hierarchy (criteria 11–13);
+      - the repository contract (criteria 14–21): duplicate, unknown id as three rows with the empty list after a failed `update`, ordering, tie-break by id;
+      - no inheritance, over `REPOSITORY_CLASSES`, with the fixture typed `-> TodoRepository` (criterion 22);
+      - domain import purity, naming only the forbidden imports (criterion 23).
+    - The coder's `make check` after the last change was green (journal entry 23).
+
+    Group 2, architecture: passes.
+    - `app.domain` imports only the standard library and `app.domain`.
+    - `app.repository.memory` imports only `app.domain` and has no base class.
+    - `app.service` and `app.api` do not exist yet.
+
+    Group 3, security: passes. There are no secrets, no suppression markers and no shell or SQL built from strings.
+
+    Group 4, quality: passes.
+    - The domain has the module, class and function docstrings that `CLAUDE.md` asks for; `app.repository` has its module docstrings.
+    - The one comment (`model.py:24`) explains why `object.__setattr__` is used.
+    - Considered and not raised: `moment.tzinfo is None` in `_as_utc` is implied by `utcoffset() is None`. It is redundant but harmless and reads clearly.
+
+    Group 5, work item hygiene: passes.
+    - The journal explains the main choice (`__post_init__` as the single place where the rules are checked) and what was rejected (checking only in `new` and `with_title`; a `TodoTitle` value type).
+    - The Description matches what was built.
+    - Criterion 26 (docs) still describes what a reader needs to know after this story.
+
+    Earlier tests: none. Every test file in the diff is new (status `A`).
+
+    Notes:
+    - `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13` both define the same `T0`. A shared module under `tests/` could hold it.
+    - `tests/domain/test_model.py`: these build the same todo:
+      - `_from_constructor` (line 14);
+      - `_created_at_from_constructor` (line 30);
+      - the `todo` fixture (line 56);
+      - `tests/repository/test_contract.py:30` (`_todo`).
+      One shared builder with keyword defaults would cover all of them.
