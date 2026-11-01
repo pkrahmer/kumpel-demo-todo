@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: smoke-test
+  started_at: '2026-11-01T13:26:18.684529Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -113,6 +117,11 @@ journal:
   at: '2026-11-01T13:25:58.770653Z'
   stage: docs
   run: 946d7d7a41c94b5c99440dc4a30b2bca
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:26:18.684529Z'
+  stage: smoke-test
 ---
 
 # Service layer with filtering
@@ -351,3 +360,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     Stale text not touched: none seen. `CLAUDE.md` names `docs/api.md` and `docs/decisions.md`, which do not exist yet. That is expected before the API story.
 
     `check`: check: green
+20. factory: started smoke-test as demo.
