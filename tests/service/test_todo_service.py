@@ -8,25 +8,14 @@ import pytest
 
 from app.domain.errors import InvalidTitle, TodoNotFound
 from app.repository.memory import InMemoryTodoRepository
-from app.service.todo_service import Clock, TodoService, utc_now
-from tests.fakes import T0
+from app.service.todo_service import TodoService, utc_now
+from tests.fakes import T0, ticking_clock
 
 UNKNOWN_ID = UUID(int=404)
 
 
 def _fixed_clock() -> datetime:
     return T0
-
-
-def _ticking_clock() -> Clock:
-    ticks = 0
-
-    def clock() -> datetime:
-        nonlocal ticks
-        ticks += 1
-        return T0 + timedelta(minutes=ticks)
-
-    return clock
 
 
 @pytest.fixture
@@ -36,7 +25,7 @@ def service() -> TodoService:
 
 @pytest.fixture
 def ticking_service() -> TodoService:
-    return TodoService(InMemoryTodoRepository(), clock=_ticking_clock())
+    return TodoService(InMemoryTodoRepository(), clock=ticking_clock())
 
 
 def _assert_now_in_utc(moment: datetime) -> None:
