@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:12:02.581630Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -124,6 +128,11 @@ journal:
   at: '2026-11-01T13:11:42.245376Z'
   stage: tests
   run: 33d9e90606624dffbf01e794850c8db8
+- number: 22
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:12:02.581630Z'
+  stage: doing
 ---
 
 # Domain model and in-memory repository
@@ -490,3 +499,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
     `lint`: lint: green (0.0 s)
     `test`: test: green (1.5 s)
+22. factory: started doing as demo.
