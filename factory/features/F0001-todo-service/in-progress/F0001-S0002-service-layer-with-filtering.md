@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:20:26.790833Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-11-01T13:20:26.790833Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:21:03.714405Z'
+  stage: doing
+  run: 8e27ef350ad64a018f3e9a7f31e86c7a
 ---
 
 # Service layer with filtering
@@ -170,3 +172,13 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    `lint`: lint: green (0.0 s)
    `test`: 61 passed, 1 error in 0.79s
 6. factory: started doing as demo.
+7. coder: Built the service layer: `src/app/service/__init__.py` (package docstring) and `src/app/service/todo_service.py` with `Clock`, `utc_now()` and `TodoService`. `TodoService` depends only on the `TodoRepository` protocol. It stamps `created_at` with the injected clock through `Todo.new` and filters `list(done=...)` over `list_all()`, so the list keeps the repository's creation order. `rename`, `complete` and `reopen` read the todo with `get`, build the changed copy with the domain's `with_title` / `with_done` and save it through one private `_save` (update, then return). The domain enforces the title rule, and `InvalidTitle` / `TodoNotFound` pass through unchanged. `make check` is green: 81 passed, 100% coverage.
+
+   Main choice: the service filters in memory over `list_all()`. The alternative was a `done` parameter on the repository protocol. I rejected it because it changes the S0001 protocol and contract, which is outside this story, and the filter is a use-case concern the description gives to the service. The trade-off is that a later SQL repository loads every row before filtering. Until the human asks for a filtered query, that is acceptable at single-user scale.
+
+   Refactor pass: I read the diff and found nothing to change. `_save` already removes the repeated update-and-return.
+
+   Noticed, not touched: the docs criterion (17, `docs/project-guide.md`) is the documenter's job. I wrote no route or schema, so `make openapi` was not needed. The journal did not change the meaning of the description.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
