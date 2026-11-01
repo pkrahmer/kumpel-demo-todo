@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:06:48.022898Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-11-01T13:06:27.905550Z'
   stage: review
   run: dc6560f9fc354963b7e684a74b798725
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:06:48.022898Z'
+  stage: doing
 ---
 
 # Domain model and in-memory repository
@@ -292,3 +301,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    - `T0` and a small todo builder appear in both `test_model.py` and `test_contract.py`. The tester rejected a shared helper on purpose, and no earlier test module holds a copy.
 
    Earlier tests: none. Every test file in the diff is new (status `A`).
+10. factory: started doing as demo.
