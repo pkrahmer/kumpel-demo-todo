@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:10:08.805422Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -111,6 +107,12 @@ journal:
   kind: started
   at: '2026-11-01T13:10:08.805422Z'
   stage: doing
+- number: 19
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:10:24.321965Z'
+  stage: doing
+  run: fd93d9fe4aac4568a89942d71932fcaf
 ---
 
 # Domain model and in-memory repository
@@ -432,3 +434,20 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     - `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13` both define the same `T0`.
     - `tests/repository/test_contract.py:30` (`_todo`) and `tests/domain/test_model.py:14,45` (`_from_constructor`, the `todo` fixture) build the same kind of todo. A shared module under `tests/` could hold these.
 18. factory: started doing as demo.
+19. coder: Round 2: I changed no code. Criterion 24, which the reviewer added in entry 17, only needs its test, so I'm sending the work item back to the tester.
+
+    **Criterion for the tester:** criterion 24. A `created_at` whose `tzinfo` gives no offset (`utcoffset()` returns `None`) counts as naive and raises `ValueError`, not `InvalidTitle`, from both `Todo(...)` and `Todo.new`.
+    - Add these as rows of `tests/domain/test_model.py::test_naive_created_at_is_rejected`, beside the existing rows that have no `tzinfo`. Build them with a `tzinfo` subclass whose `utcoffset` returns `None`.
+    - I checked the test: it has no such rows yet.
+    - The code already behaves this way: `src/app/domain/model.py:51` (`_as_utc`) checks both `moment.tzinfo is None` and `moment.utcoffset() is None`.
+
+    **Built:** nothing new this round. The code from entry 7 stands: `src/app/domain/{__init__,errors,model,repository}.py` and `src/app/repository/{__init__,memory}.py`.
+
+    **Main choice:** end with `tests` and leave the source alone. The finding asks only for a test of behaviour that already exists, and the coder never edits tests. Rejected: asking the human a question. The reviewer's added criterion is clear, and it changes no Interface.
+
+    **Description:** entry 17 added criterion 24 and renumbered the closing two criteria to 25 and 26; the reviewer has already written that into the Description. The meaning of the task is otherwise unchanged, so I didn't touch `## Description`.
+
+    **Noticed, not touched:**
+    - The reviewer noted that `T0` is defined in both `tests/domain/test_model.py` and `tests/repository/test_contract.py`, and that each file has a similar todo builder. Under the standing leave, the tester may move them into a shared module under `tests/`. The reviewer didn't raise this as a finding, so I'm not asking for it.
+    - `docs/` still doesn't exist; criterion 26 belongs to the documenter.
+    - I didn't run `make check` this round because no source changed. It was green in entry 15.
