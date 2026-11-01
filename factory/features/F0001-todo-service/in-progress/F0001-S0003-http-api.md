@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: intake
+  started_at: '2026-11-01T13:33:01.604412Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -30,6 +34,11 @@ journal:
   speaker: human
   kind: comment
   at: '2026-11-01T13:32:44.265454Z'
+  stage: intake
+- number: 5
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:33:01.604412Z'
   stage: intake
 ---
 
@@ -171,3 +180,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Architecture: the layering fits, and only `main` imports `app.repository`.
    - Scope: within the feature, and `make openapi` exists in the Makefile.
 4. 2026-11-01 human: Yes, as you propose: add the criterion `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`, placed before the two closing criteria. It follows from the Interface's rule that every title is checked after stripping.
+5. factory: started intake as demo.
