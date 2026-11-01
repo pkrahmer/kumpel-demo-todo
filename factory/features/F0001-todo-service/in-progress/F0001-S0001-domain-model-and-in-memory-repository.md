@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:05:33.843089Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-11-01T13:05:33.843089Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:06:27.905550Z'
+  stage: review
+  run: dc6560f9fc354963b7e684a74b798725
 ---
 
 # Domain model and in-memory repository
@@ -262,3 +264,31 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
 8. factory: started review as demo.
+9. reviewer: Reviewed `git diff main...HEAD -- . ':!factory'` against the work item. There was no generated file or lock file in the diff to leave out.
+
+   Group 1, acceptance criteria: passes.
+   - Criteria 1–23 each have a test that checks what the criterion says.
+   - The length limit is tested on both sides (1, 200 and 201 characters, each also with padding), and from all three ways of building a todo.
+   - The failing sides are tested: blank title, 201 characters and naive `created_at`.
+   - Criterion 16 checks the empty list after the failed `update`.
+   - Criterion 22 runs over `REPOSITORY_CLASSES`, and the fixture is annotated `-> TodoRepository`.
+   - The coder's `make check` was green (journal entry 7).
+
+   Groups 2 and 3, architecture and security: pass.
+   - `app.domain` imports only `app.domain` and the standard library.
+   - `app.repository.memory` imports only `app.domain` and has no base class.
+   - There are no suppression markers, no secrets and no string-built shell or SQL.
+
+   Group 4, quality: one finding.
+   1. `tests/domain/test_model.py:655-662` and `:672-679`: `test_created_at_is_converted_to_utc` and `test_naive_created_at_is_rejected` each have their own identical list of builder lambdas (constructor, new). That is a second copy of the same setup in one module, and `CLAUDE.md` says shared setup is defined once. Fix: define the two builders once at module level, like `TITLE_BUILDERS`/`BUILDER_IDS` (for example `CREATED_AT_BUILDERS` with ids `["constructor", "new"]`), and parametrize both tests over it. This is the tester's change: no test is renamed and no check changes.
+
+   Group 5 was not reached because the review stops at group 4. Nothing there stood out:
+   - The journal explains the `__post_init__` choice and what was rejected.
+   - The Description matches what was built.
+   - The docs criterion (25) still describes what the reader needs to know.
+
+   Considered and not raised:
+   - `_as_utc` checks both `tzinfo is None` and `utcoffset() is None`. The first test is redundant but correct, and it reads clearly.
+   - `T0` and a small todo builder appear in both `test_model.py` and `test_contract.py`. The tester rejected a shared helper on purpose, and no earlier test module holds a copy.
+
+   Earlier tests: none. Every test file in the diff is new (status `A`).
