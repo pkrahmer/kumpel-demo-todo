@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:06:48.022898Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-11-01T13:06:48.022898Z'
   stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:07:05.124240Z'
+  stage: doing
+  run: b39d1f6e1720497d87d3033bb6475117
 ---
 
 # Domain model and in-memory repository
@@ -302,3 +304,14 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
    Earlier tests: none. Every test file in the diff is new (status `A`).
 10. factory: started doing as demo.
+11. coder: Round 1: the review's only finding (entry 9, group 4) is about the tests, so I changed no code and am handing it to the tester.
+
+    Change for the tester, in `tests/domain/test_model.py`: `test_created_at_is_converted_to_utc` (line 94) and `test_naive_created_at_is_rejected` (line 111) each have their own identical list of builder lambdas (constructor and new). Define that list once at module level, next to `TITLE_BUILDERS` and `BUILDER_IDS` (for example `CREATED_AT_BUILDERS` with ids `["constructor", "new"]`), and parametrize both tests over it. Neither test is renamed and neither checks anything different.
+
+    Built: nothing new this round. The code from entry 7 stands: `src/app/domain/{errors,model,repository}.py` and `src/app/repository/memory.py`.
+
+    Main choice: send the work item back with `tests` instead of asking a question. The finding changes only the setup inside one new test module the tester wrote for this story, the reviewer called it the tester's change, and the coder never edits tests. Rejected: editing the test myself, which the role forbids.
+
+    Description: the journal did not change the meaning of the task, so `## Description` is untouched.
+
+    Noticed, not touched: as in entry 7, `docs/` does not exist yet; criterion 25 belongs to the documenter. I did not run `make check` this round because nothing in the source changed; it was green in entry 7.
