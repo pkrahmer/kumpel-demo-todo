@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: smoke-test
+  started_at: '2026-11-01T13:14:59.269876Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -157,6 +161,11 @@ journal:
   at: '2026-11-01T13:14:39.245979Z'
   stage: docs
   run: 1f5eff5bf86e4546a88156b4f26cf7da
+- number: 28
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:14:59.269876Z'
+  stage: smoke-test
 ---
 
 # Domain model and in-memory repository
@@ -611,3 +620,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     Stale text I saw and did not touch: none. The reviewer's notes on duplicated test helpers (`T0` and the todo builders) are the tester's under the standing leave, not documentation.
 
     `check`: check: green
+28. factory: started smoke-test as demo.
