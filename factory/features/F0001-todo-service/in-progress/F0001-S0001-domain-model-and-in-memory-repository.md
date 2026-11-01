@@ -1,5 +1,5 @@
 ---
-stage: docs
+stage: smoke-test
 blocked: null
 round: 2
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: docs
-  started_at: '2026-11-01T13:13:59.101584Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -155,6 +151,12 @@ journal:
   kind: started
   at: '2026-11-01T13:13:59.101584Z'
   stage: docs
+- number: 27
+  speaker: documenter
+  kind: result
+  at: '2026-11-01T13:14:39.245979Z'
+  stage: docs
+  run: 1f5eff5bf86e4546a88156b4f26cf7da
 ---
 
 # Domain model and in-memory repository
@@ -596,3 +598,16 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
       - `tests/repository/test_contract.py:30` (`_todo`).
       One shared builder with keyword defaults would cover all of them.
 26. factory: started docs as demo.
+27. documenter: Wrote the documentation for criterion 26. I found no findings against the code: the Interface, the docstrings and the behaviour agree. I did not run `make check`, because every file I changed is a document; the factory's check decides.
+
+    Files changed:
+    - `docs/project-guide.md` (new): the layers (a table of which layer may import which, and that service and repository never import each other), the domain model (the `Todo` fields, the title rule, UTC timestamps, `Todo.new`, the three errors with their messages, the repository protocol with its ordering and tie-break), and how a repository joins the contract suite. It says that only the domain and the in-memory repository exist so far.
+    - `README.md`: *Where to look next* now links `docs/project-guide.md`.
+
+    I ran the first smoke-test command. It printed `True 'Buy milk' 2026-10-04T12:00:00+00:00`, then `False 'Write the next story' 2026-10-04T12:01:00+00:00`, as expected.
+
+    Cross-read and found current: `README.md` (Getting started and How it is built), and the source under `src/app/domain` and `src/app/repository` against the new guide. `docs/api.md`, `docs/decisions.md` and `docs/openapi.json` do not exist. They belong to later stories, since no route or schema exists yet, so I created none.
+
+    Stale text I saw and did not touch: none. The reviewer's notes on duplicated test helpers (`T0` and the todo builders) are the tester's under the standing leave, not documentation.
+
+    `check`: check: green
