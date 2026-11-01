@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:10:08.805422Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -102,6 +106,11 @@ journal:
   at: '2026-11-01T13:09:48.846331Z'
   stage: review
   run: 7c16c4783bd04b74a333fc88c3d46a27
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:10:08.805422Z'
+  stage: doing
 ---
 
 # Domain model and in-memory repository
@@ -422,3 +431,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     Notes:
     - `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13` both define the same `T0`.
     - `tests/repository/test_contract.py:30` (`_todo`) and `tests/domain/test_model.py:14,45` (`_from_constructor`, the `todo` fixture) build the same kind of todo. A shared module under `tests/` could hold these.
+18. factory: started doing as demo.
