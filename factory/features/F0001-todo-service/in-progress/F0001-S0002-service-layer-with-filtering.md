@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: smoke-test
-  started_at: '2026-11-01T13:26:18.684529Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -122,6 +118,12 @@ journal:
   kind: started
   at: '2026-11-01T13:26:18.684529Z'
   stage: smoke-test
+- number: 21
+  speaker: smoke-tester
+  kind: result
+  at: '2026-11-01T13:26:44.054572Z'
+  stage: smoke-test
+  run: 073f7edd76a547b49072a26b57892ea6
 ---
 
 # Service layer with filtering
@@ -361,3 +363,34 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
     `check`: check: green
 20. factory: started smoke-test as demo.
+21. smoke-tester: Smoke test round 1. I ran both commands under `## Smoke test` from the repository root, as written and in order. I fixed nothing.
+
+    Command 1 (create, complete, filter, rename on a fixed clock):
+    ```
+    ['Buy milk']
+    ['Write the next story']
+    Write story S0003 2026-10-04T12:00:00+00:00
+    ```
+    Exit 0. Met its `Expect:` line: these are the three expected lines, exactly.
+
+    Command 2 (blank title, unknown id, list on the default clock):
+    ```
+    InvalidTitle
+    TodoNotFound
+    []
+    ```
+    Exit 0. Met its `Expect:` line: `InvalidTitle`, then `TodoNotFound`, then `[]`.
+
+    Against the acceptance criteria, the output supports these and contradicts none:
+    - 1: the title is stripped to `Buy milk`.
+    - 2: a blank create stores nothing, and `list()` is `[]` afterwards.
+    - 5: the `done=True` and `done=False` filters return what they should.
+    - 6: rename keeps `created_at`, which is the clock's value.
+    - 8: the completed todo shows up under `done=True`.
+    - 13: `complete` with an unknown id raises `TodoNotFound`.
+    - 15: a service built without a clock works.
+    - 17: `docs/project-guide.md` has a "Service" section. It says what `TodoService` owns (the use cases, the clock, the done filter) and that it reaches storage only through the `TodoRepository` protocol. That matches the commands' behaviour.
+
+    The smoke test doesn't cover criterion 16 (`make check`). The factory runs that check itself. I didn't run it in this stage.
+
+    Findings: none.
