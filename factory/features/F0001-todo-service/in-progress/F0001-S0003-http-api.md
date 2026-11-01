@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:39:08.132668Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -95,6 +91,12 @@ journal:
   kind: started
   at: '2026-11-01T13:39:08.132668Z'
   stage: tests
+- number: 16
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:39:43.469056Z'
+  stage: tests
+  run: 60dc2cb9215d4906a5090d5ed189eaa0
 ---
 
 # HTTP API
@@ -345,3 +347,18 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - Description: the reviewer already added criterion 25 and renumbered the closing criteria to 26 and 27. No journal entry changed the task otherwise, so I left the Description alone.
     - Noticed, not touched: nothing new beyond entry 10. That is the extra read in `PATCH` and the `StarletteDeprecationWarning` from the pinned dependencies.
 15. factory: started tests as demo.
+16. tester: Round 1, tests: I wrote the test for criterion 25, the one the reviewer added and the coder handed over in entry 14. I edited no earlier test.
+
+    - criterion 25: `tests/api/test_todos.py::test_patch_ignores_a_null_field_beside_a_set_one`. It is one parametrized test with two rows. Each row creates an open todo titled `Old title` and sends `PATCH /todos/{id}`:
+      - `{"title": null, "done": true}` must return 200 and the todo completed, with the title `Old title`.
+      - `{"title": " New title ", "done": null}` must return 200 and the todo titled `New title`, still open.
+      - In both rows, the body must equal the todo from before with only those fields changed, and a `GET` afterwards must return the same body.
+
+    Files: I created no new file. I added this one test to `tests/api/test_todos.py`, the test module this story already has, and reused its `client` fixture.
+
+    Imports: every module imported. As the coder said, the code already does this, so the new test passes rather than failing first. `make test` gave 124 passed, coverage 100%. `make lint` is green.
+
+    Open: nothing. I needed no interpretation: the criterion names both rows and the `GET` check.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (2.3 s)

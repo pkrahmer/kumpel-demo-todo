@@ -210,6 +210,26 @@ def test_patch_title_and_done_applies_both(client: TestClient) -> None:
     assert client.get(f"/todos/{before['id']}").json() == expected
 
 
+@pytest.mark.parametrize(
+    ("body", "changes"),
+    [
+        ({"title": None, "done": True}, {"done": True}),
+        ({"title": " New title ", "done": None}, {"title": "New title", "done": False}),
+    ],
+)
+def test_patch_ignores_a_null_field_beside_a_set_one(
+    client: TestClient, body: dict[str, object], changes: dict[str, object]
+) -> None:
+    before = client.post("/todos", json={"title": "Old title"}).json()
+    expected = {**before, **changes}
+
+    response = client.patch(f"/todos/{before['id']}", json=body)
+
+    assert response.status_code == 200
+    assert response.json() == expected
+    assert client.get(f"/todos/{before['id']}").json() == expected
+
+
 def test_delete_removes_the_todo(client: TestClient) -> None:
     todo_id = _create(client, "Buy milk")
 
