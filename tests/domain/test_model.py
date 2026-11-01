@@ -27,6 +27,21 @@ TITLE_BUILDERS: list[Callable[[str], Todo]] = [_from_constructor, _from_new, _fr
 BUILDER_IDS = ["constructor", "new", "with_title"]
 
 
+def _created_at_from_constructor(created_at: datetime) -> Todo:
+    return Todo(id=UUID(int=1), title="Buy milk", done=False, created_at=created_at)
+
+
+def _created_at_from_new(created_at: datetime) -> Todo:
+    return Todo.new("Buy milk", now=created_at)
+
+
+CREATED_AT_BUILDERS: list[Callable[[datetime], Todo]] = [
+    _created_at_from_constructor,
+    _created_at_from_new,
+]
+CREATED_AT_BUILDER_IDS = ["constructor", "new"]
+
+
 @pytest.fixture
 def todo() -> Todo:
     return Todo(id=UUID(int=1), title="Buy milk", done=False, created_at=T0)
@@ -83,14 +98,7 @@ def test_title_length_is_limited_to_200_characters(
         assert str(excinfo.value) == "title must be at most 200 characters"
 
 
-@pytest.mark.parametrize(
-    "build",
-    [
-        lambda at: Todo(id=UUID(int=1), title="Buy milk", done=False, created_at=at),
-        lambda at: Todo.new("Buy milk", now=at),
-    ],
-    ids=["constructor", "new"],
-)
+@pytest.mark.parametrize("build", CREATED_AT_BUILDERS, ids=CREATED_AT_BUILDER_IDS)
 def test_created_at_is_converted_to_utc(build: Callable[[datetime], Todo]) -> None:
     local = datetime(2026, 10, 4, 14, 0, tzinfo=timezone(timedelta(hours=2)))
 
@@ -100,14 +108,7 @@ def test_created_at_is_converted_to_utc(build: Callable[[datetime], Todo]) -> No
     assert created_at.utcoffset() == timedelta(0)
 
 
-@pytest.mark.parametrize(
-    "build",
-    [
-        lambda at: Todo(id=UUID(int=1), title="Buy milk", done=False, created_at=at),
-        lambda at: Todo.new("Buy milk", now=at),
-    ],
-    ids=["constructor", "new"],
-)
+@pytest.mark.parametrize("build", CREATED_AT_BUILDERS, ids=CREATED_AT_BUILDER_IDS)
 def test_naive_created_at_is_rejected(build: Callable[[datetime], Todo]) -> None:
     with pytest.raises(ValueError) as excinfo:
         build(datetime(2026, 10, 4, 12, 0))

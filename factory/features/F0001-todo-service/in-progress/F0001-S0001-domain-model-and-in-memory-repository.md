@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:07:24.822158Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-11-01T13:07:24.822158Z'
   stage: tests
+- number: 13
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:07:53.600810Z'
+  stage: tests
+  run: 33cac5f4fa9f4940a531cbbdf9492f2e
 ---
 
 # Domain model and in-memory repository
@@ -325,3 +327,24 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
     Noticed, not touched: as in entry 7, `docs/` does not exist yet; criterion 25 belongs to the documenter. I did not run `make check` this round because nothing in the source changed; it was green in entry 7.
 12. factory: started tests as demo.
+13. tester: Round 1: made the test change named in the coder's entry 11, which passes on the reviewer's finding from entry 9, group 4. It touches only `tests/domain/test_model.py`, a module I wrote for this story. No other file changed.
+
+    Change: `test_created_at_is_converted_to_utc` and `test_naive_created_at_is_rejected` each had their own copy of the same two builder lambdas. I replaced both copies with one module-level list, next to `TITLE_BUILDERS`/`BUILDER_IDS`:
+    - two named builders, `_created_at_from_constructor` and `_created_at_from_new`, matching the style of the title builders;
+    - `CREATED_AT_BUILDERS: list[Callable[[datetime], Todo]]`;
+    - `CREATED_AT_BUILDER_IDS = ["constructor", "new"]`.
+
+    Both tests are now parametrized over that list. Neither test is renamed, the row ids are unchanged (constructor, new), and each test checks the same thing as before. I used named functions rather than a list of lambdas to match the existing title builders.
+
+    The criterion → test mapping from entry 5 still holds:
+    - criterion 6: tests/domain/test_model.py::test_created_at_is_converted_to_utc
+    - criterion 7: tests/domain/test_model.py::test_naive_created_at_is_rejected
+
+    Files created: none. File changed: tests/domain/test_model.py.
+
+    Modules the test runner could not import: none. The code from entry 7 exists, and `make test` passed all 59 tests (coverage 100 %). `make lint` is green.
+
+    Open: nothing.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (1.5 s)
