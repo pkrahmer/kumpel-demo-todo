@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:19:20.317843Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-11-01T13:19:00.449815Z'
   stage: intake
   run: c0d87f0da7bf45e2beb8c4b0ac0e2bbf
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:19:20.317843Z'
+  stage: tests
 ---
 
 # Service layer with filtering
@@ -125,3 +134,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    Smoke test: both commands are plain `uv run python -c` runs and do not call pytest. Each `Expect:` line is checkable against the printed output: the three exact lines in the first, and `InvalidTitle`, `TodoNotFound`, `[]` in the second.
    Architecture: the service depends on the repository protocol only, and tests may import the in-memory repository. This matches the layering in CLAUDE.md, and `make layers` enforces it.
    Scope: the story covers feature decisions 5 and 17 and the feature's service-layer scope bullet. It adds no API, no persistence and no sorting beyond creation order, so it stays out of "Out of scope".
+4. factory: started tests as demo.
