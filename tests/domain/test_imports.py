@@ -1,25 +1,7 @@
-import ast
-from pathlib import Path
+from tests.imports import SRC_DIR, imported_modules
 
-DOMAIN_DIR = Path(__file__).resolve().parents[2] / "src" / "app" / "domain"
+DOMAIN_DIR = SRC_DIR / "app" / "domain"
 FORBIDDEN_FRAMEWORKS = {"fastapi", "pydantic", "sqlalchemy"}
-
-
-def _imported_modules(path: Path) -> set[str]:
-    package_parts = ["app", "domain", *path.relative_to(DOMAIN_DIR).parent.parts]
-    modules: set[str] = set()
-    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
-        if isinstance(node, ast.Import):
-            modules.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom):
-            if node.level:
-                prefix = ".".join(package_parts[: len(package_parts) - node.level + 1])
-                base_module = f"{prefix}.{node.module}" if node.module else prefix
-            else:
-                base_module = node.module or ""
-            modules.add(base_module)
-            modules.update(f"{base_module}.{alias.name}" for alias in node.names)
-    return modules
 
 
 def _is_forbidden(module: str) -> bool:
@@ -37,7 +19,7 @@ def test_domain_imports_no_framework_and_no_other_app_layer() -> None:
     offending = {
         f"{path.name}: {module}"
         for path in sources
-        for module in _imported_modules(path)
+        for module in imported_modules(path)
         if _is_forbidden(module)
     }
 

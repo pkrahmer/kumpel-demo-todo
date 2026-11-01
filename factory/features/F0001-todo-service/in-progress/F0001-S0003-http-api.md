@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:33:38.055038Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -51,6 +47,12 @@ journal:
   kind: started
   at: '2026-11-01T13:33:38.055038Z'
   stage: tests
+- number: 8
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:35:07.306030Z'
+  stage: tests
+  run: 8dac314487e248a3b4c6ff0b15e2a7cd
 ---
 
 # HTTP API
@@ -202,3 +204,46 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
    Carried in from journal entry 4 (the human's answer): I added criterion 24, "`POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`", before the two closing criteria. `make check` is now criterion 25 and `docs:` is 26. The Interface's references to criteria 21–23 are unchanged. I made no other edits.
 7. factory: started tests as demo.
+8. tester: I wrote one test for each acceptance criterion. All tests go through FastAPI's `TestClient` against `create_app(TodoService(InMemoryTodoRepository(), clock=ticking_clock()))`, built in a fixture. I used the ticking clock so that the order in which todos are created is deterministic.
+
+   - criterion 1: tests/api/test_todos.py::test_create_returns_the_new_open_todo
+   - criterion 2: tests/api/test_todos.py::test_create_with_a_blank_title_is_rejected
+   - criterion 3: tests/api/test_todos.py::test_create_enforces_the_title_length_limit (rows 200 → 201, 201 → 422)
+   - criterion 4: tests/api/test_todos.py::test_create_without_a_title_names_the_missing_field
+   - criterion 5: tests/api/test_todos.py::test_list_returns_every_todo_in_creation_order
+   - criterion 6: tests/api/test_todos.py::test_list_filters_by_done (rows true, false)
+   - criterion 7: tests/api/test_todos.py::test_list_with_an_invalid_done_filter_is_rejected
+   - criterion 8: tests/api/test_todos.py::test_get_returns_the_known_todo
+   - criterion 9: tests/api/test_todos.py::test_an_id_that_is_not_a_uuid_is_rejected (rows GET, PATCH, DELETE)
+   - criterion 10: tests/api/test_todos.py::test_patch_done_completes_and_reopens_the_todo
+   - criterion 11: tests/api/test_todos.py::test_patch_title_renames_the_todo_and_keeps_the_rest
+   - criterion 12: tests/api/test_todos.py::test_patch_that_sets_no_field_is_rejected_and_changes_nothing (four rows)
+   - criterion 13: tests/api/test_todos.py::test_patch_with_a_blank_title_changes_nothing
+   - criterion 14: tests/api/test_todos.py::test_patch_title_and_done_applies_both
+   - criterion 15: tests/api/test_todos.py::test_delete_removes_the_todo
+   - criterion 16: tests/api/test_todos.py::test_an_unknown_id_is_not_found (rows GET, PATCH, DELETE)
+   - criterion 17: tests/api/test_todos.py::test_routes_use_the_service_given_to_create_app
+   - criterion 18: tests/api/test_todos.py::test_the_api_is_called_todo_service
+   - criterion 19: tests/api/test_todos.py::test_each_app_lists_only_the_todos_of_its_own_service
+   - criterion 20: tests/api/test_todos.py::test_every_error_body_has_detail_as_its_only_key (one row per request from criteria 2, 4, 7, 9 and 16)
+   - criterion 21: tests/api/test_openapi.py::test_committed_openapi_schema_is_up_to_date
+   - criterion 22: tests/api/test_openapi.py::test_schema_names_the_todo_paths_with_the_todos_tag
+   - criterion 23: tests/api/test_imports.py::test_only_main_imports_the_repository_layer (it names only the forbidden `app.repository`)
+   - criterion 24: tests/api/test_todos.py::test_create_strips_the_title
+   - criteria 25 and 26: the factory's check and the docs stage; no tests.
+
+   Files I created: tests/api/__init__.py, tests/api/test_todos.py, tests/api/test_openapi.py, tests/api/test_imports.py, tests/imports.py.
+
+   I moved two shared helpers under the standing leave in CLAUDE.md *Tests*. Each earlier test keeps its name and checks the same thing:
+   - The ticking clock moved from tests/service/test_todo_service.py into tests/fakes.py as `ticking_clock`. I changed tests/service/test_todo_service.py to import it from there.
+   - The AST import reader moved from tests/domain/test_imports.py into the new tests/imports.py as `imported_modules`. It now works out the package from the path under `src/` instead of a fixed `app.domain` prefix. I changed tests/domain/test_imports.py to use it.
+
+   Result of `make test`:
+   - The test runner could not import `app.api.app` (tests/api/test_todos.py) or `app.api.main` (tests/api/test_openapi.py), so both modules give collection errors.
+   - test_only_main_imports_the_repository_layer fails because `src/app/api` has no sources yet.
+   - All 81 earlier tests pass.
+
+   `make lint` is green. Nothing in the criteria needed interpreting, so I have no question open.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 1 failed, 81 passed, 4 warnings, 2 errors in 1.44s
