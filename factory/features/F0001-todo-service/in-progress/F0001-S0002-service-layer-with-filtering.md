@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: intake
-  started_at: '2026-11-01T13:18:43.289282Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-11-01T13:18:43.289282Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-11-01T13:19:00.449815Z'
+  stage: intake
+  run: c0d87f0da7bf45e2beb8c4b0ac0e2bbf
 ---
 
 # Service layer with filtering
@@ -117,3 +119,9 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
 1. 2026-11-01 human: created.
 2. factory: started intake as demo.
+3. intake: accepted
+   Interface: `src/app/service/todo_service.py` names `Clock`, `utc_now` and `TodoService` with typed signatures for all seven use cases. The collaborators it relies on (`TodoRepository`, `InMemoryTodoRepository`, `InvalidTitle`, `TodoNotFound`) come from S0001. I did not open the S0001 sources.
+   Criteria: each is testable by one test function. Every Interface behaviour has a criterion: the clock stamp (1), `list(done=None)` as no filter and creation order (4, 5), error propagation (2, 3, 7, 13), and `utc_now` and its default use (14, 15). Every rule has both sides: blank title rejected on create (2) and rename (7), unknown id for all four mutators (13), and complete/reopen idempotence (9, 11). The 200-character title limit is a domain rule from S0001, and the service passes its errors through unchanged, so it needs no criterion here. Criteria 16 and 17 are the two closing ones, in the right order.
+   Smoke test: both commands are plain `uv run python -c` runs and do not call pytest. Each `Expect:` line is checkable against the printed output: the three exact lines in the first, and `InvalidTitle`, `TodoNotFound`, `[]` in the second.
+   Architecture: the service depends on the repository protocol only, and tests may import the in-memory repository. This matches the layering in CLAUDE.md, and `make layers` enforces it.
+   Scope: the story covers feature decisions 5 and 17 and the feature's service-layer scope bullet. It adds no API, no persistence and no sorting beyond creation order, so it stays out of "Out of scope".
