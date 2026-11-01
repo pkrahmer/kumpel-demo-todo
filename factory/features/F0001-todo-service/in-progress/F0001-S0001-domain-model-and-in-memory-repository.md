@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:08:13.886993Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -89,6 +85,12 @@ journal:
   kind: started
   at: '2026-11-01T13:08:13.886993Z'
   stage: doing
+- number: 15
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:08:40.341599Z'
+  stage: doing
+  run: ce68180064ea43a489f973bdcaa87131
 ---
 
 # Domain model and in-memory repository
@@ -358,3 +360,25 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     `lint`: lint: green (0.0 s)
     `test`: test: green (1.5 s)
 14. factory: started doing as demo.
+15. coder: Round 1, after the tester's change: I changed no code. The review's only finding (entry 9, group 4) was about a duplicated list of builders in `tests/domain/test_model.py`. The tester fixed it in entry 13 by adding one module-level `CREATED_AT_BUILDERS`, and nothing about the finding is left for the coder.
+
+    Built: nothing new this round. The code from entry 7 is unchanged:
+    - src/app/domain/__init__.py
+    - src/app/domain/errors.py
+    - src/app/domain/model.py
+    - src/app/domain/repository.py
+    - src/app/repository/__init__.py
+    - src/app/repository/memory.py
+
+    Check: I ran `make check` on the current tree. It is green: 59 tests pass and coverage is 100 %.
+
+    Main choice: send the work item on to review without touching the source, because the finding was in the tests only. Rejected: another refactor pass over the source. The reviewer found nothing in the code, and a change now would go beyond the findings, which this round may not do.
+
+    Description: the journal did not change the meaning of the task, so `## Description` is untouched.
+
+    Noticed, not touched: `docs/` does not exist yet. Criterion 25 (`docs/project-guide.md` and the README link) belongs to the documenter.
+
+    `check`: check: green
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
