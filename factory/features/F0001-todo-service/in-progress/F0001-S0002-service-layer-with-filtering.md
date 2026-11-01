@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:21:23.557414Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -56,6 +52,12 @@ journal:
   kind: started
   at: '2026-11-01T13:21:23.557414Z'
   stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:22:06.088293Z'
+  stage: review
+  run: 50bce27fe1604c29add0a14836806878
 ---
 
 # Service layer with filtering
@@ -192,3 +194,21 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    `check`: check: green
    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 8. factory: started review as demo.
+9. reviewer: Reviewed `git diff main...HEAD -- . ':!factory'`: `src/app/service/__init__.py`, `src/app/service/todo_service.py`, `tests/service/__init__.py` and `tests/service/test_todo_service.py`, against the work item.
+
+   Groups 1 to 3 pass.
+   - Acceptance criteria: each of criteria 1–15 has a test that checks what the criterion says. Criterion 5 is three rows over four todos created alternately on the ticking clock. Criterion 13 is four rows, and each asserts `todo_id`. The Interface rules are covered: the clock stamp (1), no filter on `done=None` (5) and creation order (4, 5). Errors pass through for a blank title on create and on rename (2, 7) and for an unknown id on every operation (3, 13). The default clock is `utc_now` (14, 15). The Interface states no limit of its own; the 200-character title rule belongs to the domain and is tested in S0001. The coder's `make check` was green (journal entry 7).
+   - Architecture: `app.service` imports only `app.domain.model` and `app.domain.repository`, and reaches storage only through the `TodoRepository` protocol.
+   - Security: there is nothing to flag, and no suppression markers were added.
+
+   Group 4 (quality) fails on the test file:
+
+   1. `tests/service/test_todo_service.py:13`: `NOON = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` is a third copy of the existing constant `T0`, which has the same value in `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13`. The tester's entry chose to keep this copy. CLAUDE.md's standing leave covers constants as well as helpers, and a second copy of an existing helper counts as a finding. Fix: the tester moves `T0` to one shared place under `tests/`, such as `tests/fakes.py` (or `tests/conftest.py`). The two earlier modules and the service tests then import it from there, and every earlier test keeps its name and what it checks.
+
+   I rejected two other possible findings:
+   - The criterion pairs 8/9 and 10/11 as separate test functions: the intake defined them as separate criteria, and each checks something different (the change and its readback, against idempotence without an error).
+   - The method name `list` shadowing the builtin: the Interface sets that name.
+
+   Group 5 was not reached because group 4 failed.
+
+   Earlier tests: none. The diff adds test files only (status `A`) and changes no test file that `main` already holds.
