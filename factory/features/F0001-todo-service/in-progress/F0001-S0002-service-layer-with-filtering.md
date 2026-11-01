@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: review
+  started_at: '2026-11-01T13:24:39.472269Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -91,6 +95,11 @@ journal:
   at: '2026-11-01T13:24:19.374721Z'
   stage: doing
   run: 7ef7e22aa6834ae3bac1b00e203f5972
+- number: 16
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:24:39.472269Z'
+  stage: review
 ---
 
 # Service layer with filtering
@@ -294,3 +303,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
+16. factory: started review as demo.
