@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:04:28.068713Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -45,6 +41,12 @@ journal:
   kind: started
   at: '2026-11-01T13:04:28.068713Z'
   stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:05:13.776627Z'
+  stage: doing
+  run: 65781f125fa648e18275ed42ef59da9a
 ---
 
 # Domain model and in-memory repository
@@ -228,3 +230,25 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 3 errors in 0.78s
 6. factory: started doing as demo.
+7. coder: Built the domain layer and the in-memory repository. All 59 tests pass, and `make check` is green with 100 % coverage.
+
+   Paths:
+   - src/app/domain/__init__.py
+   - src/app/domain/errors.py: `TodoError`, `InvalidTitle`, `TodoNotFound`, `DuplicateTodo`. The last two set `todo_id` and the message from the hyphenated UUID.
+   - src/app/domain/model.py: `MAX_TITLE_LENGTH` and `Todo`, a frozen slotted dataclass. Private helpers `_valid_title` and `_as_utc` hold the rules.
+   - src/app/domain/repository.py: the `TodoRepository` protocol. Its docstrings state the errors and the ordering.
+   - src/app/repository/__init__.py
+   - src/app/repository/memory.py: `InMemoryTodoRepository`. It keeps a dict keyed by id, has no base class, and sorts `list_all` by `(created_at, id)`. A private `_require` raises `TodoNotFound`.
+
+   Main choice: `Todo.__post_init__` normalises and checks the title and `created_at`, using `object.__setattr__` because the class is frozen. `with_title` and `with_done` use `dataclasses.replace`. So every way of building a todo (the constructor, `new`, `with_*`) goes through one check, as the Interface requires. Rejected: checking in `new` and `with_title` only. Plain `Todo(...)` would then bypass the rules, which criteria 3–7 forbid. Also rejected: a separate validated `TodoTitle` value type. The Interface fixes `title: str`.
+
+   Refactor pass: I read the diff and found nothing to change.
+
+   Description: the journal did not change the meaning of the task, so `## Description` is untouched.
+
+   Noticed, not touched:
+   - `docs/` does not exist yet. Criterion 25 (`docs/project-guide.md`, the README link) is the documenter's.
+   - No route or schema exists yet, so I did not run `make openapi`.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
