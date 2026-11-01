@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:33:38.055038Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -42,6 +46,11 @@ journal:
   at: '2026-11-01T13:33:17.776787Z'
   stage: intake
   run: ee508e4f74e6427a8bef18c5ef189992
+- number: 7
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:33:38.055038Z'
+  stage: tests
 ---
 
 # HTTP API
@@ -192,3 +201,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Scope: within F0001's HTTP API scope, with nothing from its Out of scope. Decisions 6, 7, 9, 10, 11 and 12 are covered by criteria.
 
    Carried in from journal entry 4 (the human's answer): I added criterion 24, "`POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`", before the two closing criteria. `make check` is now criterion 25 and `docs:` is 26. The Interface's references to criteria 21–23 are unchanged. I made no other edits.
+7. factory: started tests as demo.
