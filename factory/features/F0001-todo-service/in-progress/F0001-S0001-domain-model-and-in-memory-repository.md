@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: docs
+  started_at: '2026-11-01T13:13:59.101584Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -146,6 +150,11 @@ journal:
   at: '2026-11-01T13:13:38.780451Z'
   stage: review
   run: fcb49518dd0d4666aafa7dfbdf0ba364
+- number: 26
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:13:59.101584Z'
+  stage: docs
 ---
 
 # Domain model and in-memory repository
@@ -586,3 +595,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
       - the `todo` fixture (line 56);
       - `tests/repository/test_contract.py:30` (`_todo`).
       One shared builder with keyword defaults would cover all of them.
+26. factory: started docs as demo.
