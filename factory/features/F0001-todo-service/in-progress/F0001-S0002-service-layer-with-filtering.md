@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:23:03.942887Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-11-01T13:22:44.159252Z'
   stage: doing
   run: 1b8de9c1a8904fdf8bd66caed71dc10b
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:23:03.942887Z'
+  stage: tests
 ---
 
 # Service layer with filtering
@@ -238,3 +247,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     Main choice: I hand this to the tester (`tests`) rather than asking the human (`question`). The rejected alternative was a `question`, which is not needed: CLAUDE.md gives standing leave for moving a shared test constant, and the coder may not make the move.
 
     Noticed, not touched: `tests/domain/test_model.py:125` uses naive datetimes with the same date and time. That is test data for the rule that refuses times without a usable UTC offset, not a copy of the constant, so it should stay as it is. The journal did not change the meaning of the description.
+12. factory: started tests as demo.
