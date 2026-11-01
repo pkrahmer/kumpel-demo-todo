@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:35:27.412919Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -62,6 +58,12 @@ journal:
   kind: started
   at: '2026-11-01T13:35:27.412919Z'
   stage: doing
+- number: 10
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:36:51.241268Z'
+  stage: doing
+  run: 800a94e7b594474386769153ef02f172
 ---
 
 # HTTP API
@@ -257,3 +259,28 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    `lint`: lint: green (0.0 s)
    `test`: 1 failed, 81 passed, 4 warnings, 2 errors in 1.44s
 9. factory: started doing as demo.
+10. coder: I built the HTTP API in the modules the Interface names. I wrote no tests and changed none. `make check` is green: 122 tests pass and coverage is 100%.
+
+    What I built:
+    - `src/app/api/__init__.py`: package docstring.
+    - `src/app/api/schemas.py`: `TodoCreate`, `TodoUpdate` and `TodoRead.from_domain`.
+      - The schemas put no rule on `title`, so the domain's rule and messages apply.
+      - `TodoUpdate` has an after-validator that rejects a body setting neither field. That error becomes a `RequestValidationError` with the location `body`, so it returns 422.
+    - `src/app/api/dependencies.py`: `get_service` reads the service from `request.app.state.service`; `Service` is the `Annotated` alias.
+    - `src/app/api/errors.py`: one table, `STATUS_BY_ERROR` (`TodoNotFound` → 404, `InvalidTitle` → 422), with one handler that uses the error's message as `detail`. For a `RequestValidationError`, `detail` is the first error's location joined with dots, then `: ` and its message.
+    - `src/app/api/routes.py`: the five endpoints. `PATCH` renames first, then completes or reopens, so a title the domain refuses changes nothing.
+    - `src/app/api/app.py`: `create_app`, titled "Todo service".
+    - `src/app/api/main.py`: the composition root, using `InMemoryTodoRepository`.
+    - `docs/openapi.json`: written by `make openapi`.
+
+    Main choice: I register the handlers with FastAPI's decorator form, `app.exception_handler(cls)(handler)`, so each handler can take its own error class as its parameter type. I rejected `add_exception_handler`: Starlette types its handler as `(Request, Exception)`, so it needs either an `isinstance` assert (which ruff's S101 flags) or a cast. I also rejected one handler for the `TodoError` base class. `DuplicateTodo` has no status in the Interface and should not be given one silently.
+
+    Refactor: I renamed `_error_body` to `_error_response`, because it returns a response, not a body. Nothing else needed changing.
+
+    Noticed, not touched:
+    - `PATCH` reads the todo once more before applying the changes, so that the handler always has a todo to return. Each service call then reads it again, which costs one extra read in memory.
+    - The test client prints a `StarletteDeprecationWarning` about `httpx` versus `httpx2`. It comes from the pinned dependencies and is outside this work item.
+    - No journal entry changed the task's meaning, so I left the Description as it is.
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
