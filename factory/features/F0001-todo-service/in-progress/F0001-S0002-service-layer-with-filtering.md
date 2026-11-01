@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: docs
+  started_at: '2026-11-01T13:25:29.050117Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -102,6 +106,11 @@ journal:
   at: '2026-11-01T13:25:09.266994Z'
   stage: review
   run: 81bb078a67e941709b623c027f657efc
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:25:29.050117Z'
+  stage: docs
 ---
 
 # Service layer with filtering
@@ -326,3 +335,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     Earlier tests:
     - `tests/domain/test_model.py`: changed under the standing leave in `CLAUDE.md` to move a shared test helper. Only the local `T0` and the now-unused `UTC` import were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
     - `tests/repository/test_contract.py`: changed under the same standing leave. Only the local `T0` and the now-unused `UTC` and `datetime` imports were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
+18. factory: started docs as demo.
