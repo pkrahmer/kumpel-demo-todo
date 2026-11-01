@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 1
 attempts: 0
@@ -124,6 +124,11 @@ journal:
   at: '2026-11-01T13:26:44.054572Z'
   stage: smoke-test
   run: 073f7edd76a547b49072a26b57892ea6
+- number: 22
+  speaker: factory
+  kind: done
+  at: '2026-11-01T13:29:04.531628Z'
+  stage: approval
 ---
 
 # Service layer with filtering
@@ -394,3 +399,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     The smoke test doesn't cover criterion 16 (`make check`). The factory runs that check itself. I didn't run it in this stage.
 
     Findings: none.
+22. factory: done (pull request merged); cost: 10 runs, 4.2 min, 51 turns, 158800 tokens in (735137 more from cache), 20232 out, $1.66
