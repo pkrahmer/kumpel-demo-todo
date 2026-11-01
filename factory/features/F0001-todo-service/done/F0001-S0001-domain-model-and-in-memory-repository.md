@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 2
 attempts: 0
@@ -168,6 +168,11 @@ journal:
   at: '2026-11-01T13:15:32.037292Z'
   stage: smoke-test
   run: aa895f4377d4489392d86df1f7bc3fc3
+- number: 30
+  speaker: factory
+  kind: done
+  at: '2026-11-01T13:17:52.363148Z'
+  stage: approval
 ---
 
 # Domain model and in-memory repository
@@ -646,3 +651,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     Findings: none.
 
     Open: nothing.
+30. factory: done (pull request merged); cost: 14 runs, 8.1 min, 80 turns, 292567 tokens in (1214942 more from cache), 38720 out, $3.14
