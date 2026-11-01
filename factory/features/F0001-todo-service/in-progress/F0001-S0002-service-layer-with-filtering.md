@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: doing
+  started_at: '2026-11-01T13:22:25.842711Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -58,6 +62,11 @@ journal:
   at: '2026-11-01T13:22:06.088293Z'
   stage: review
   run: 50bce27fe1604c29add0a14836806878
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:22:25.842711Z'
+  stage: doing
 ---
 
 # Service layer with filtering
@@ -212,3 +221,4 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
    Group 5 was not reached because group 4 failed.
 
    Earlier tests: none. The diff adds test files only (status `A`) and changes no test file that `main` already holds.
+10. factory: started doing as demo.
