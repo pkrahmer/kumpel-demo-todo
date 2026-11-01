@@ -1,3 +1,30 @@
+---
+stage: intake
+blocked: null
+round: 0
+attempts: 0
+crashes: 0
+pull_request: null
+comments_read: []
+handed_over: null
+claim:
+  instance: demo
+  stage: intake
+  started_at: '2026-11-01T13:18:43.289282Z'
+  lease_duration: 60
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-11-01T13:18:43.285095Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:18:43.289282Z'
+  stage: intake
+---
+
 # Service layer with filtering
 
 ## Description
@@ -87,3 +114,6 @@ print(svc.list())
 Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
 ## Journal
+
+1. 2026-11-01 human: created.
+2. factory: started intake as demo.
