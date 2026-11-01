@@ -1,14 +1,13 @@
 from collections.abc import Callable
 from dataclasses import FrozenInstanceError
-from datetime import UTC, datetime, timedelta, timezone, tzinfo
+from datetime import datetime, timedelta, timezone, tzinfo
 from uuid import UUID
 
 import pytest
 
 from app.domain.errors import InvalidTitle
 from app.domain.model import Todo
-
-T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
+from tests.fakes import T0
 
 
 def _from_constructor(title: str) -> Todo:

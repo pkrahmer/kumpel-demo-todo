@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:23:03.942887Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -78,6 +74,12 @@ journal:
   kind: started
   at: '2026-11-01T13:23:03.942887Z'
   stage: tests
+- number: 13
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:23:32.782421Z'
+  stage: tests
+  run: cd2ded1be358414fa37af8447b6486b1
 ---
 
 # Service layer with filtering
@@ -248,3 +250,21 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
     Noticed, not touched: `tests/domain/test_model.py:125` uses naive datetimes with the same date and time. That is test data for the rule that refuses times without a usable UTC offset, not a copy of the constant, so it should stay as it is. The journal did not change the meaning of the description.
 12. factory: started tests as demo.
+13. tester: Round 1, approved test change. The coder named it in entry 11, after the reviewer's finding in entry 9. I made the move under CLAUDE.md's standing leave to move a shared test helper or constant. The constant `datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` was defined three times. It now lives once, as `T0` in a new module `tests/fakes.py`. I chose a plain module constant over a fixture because all three files use it as a module-level value.
+
+    Earlier test files changed under the standing leave:
+    - `tests/domain/test_model.py`: the local `T0` is removed and the file now imports it from `tests.fakes`. The `UTC` import is dropped because nothing else in the file uses it.
+    - `tests/repository/test_contract.py`: the local `T0` is removed and the file now imports it from `tests.fakes`. The `UTC` and `datetime` imports are dropped because nothing else in the file uses them.
+    Every earlier test keeps its name and checks the same thing, since the value is identical.
+
+    This story's file:
+    - `tests/service/test_todo_service.py`: `NOON` is replaced by `T0`, imported from `tests.fakes`.
+
+    Files created: `tests/fakes.py`.
+
+    The criterion mapping is unchanged from entry 5. `make test`: 81 passed, 100% coverage. `make lint` and `make types` are green. Every module imports; nothing failed to import.
+
+    The naive datetimes at `tests/domain/test_model.py:125` are test data for the timezone rule, not a copy of the constant, so I left them as they were, as the coder suggested in entry 11.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (1.4 s)

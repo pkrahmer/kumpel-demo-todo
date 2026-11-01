@@ -9,13 +9,13 @@ import pytest
 from app.domain.errors import InvalidTitle, TodoNotFound
 from app.repository.memory import InMemoryTodoRepository
 from app.service.todo_service import Clock, TodoService, utc_now
+from tests.fakes import T0
 
-NOON = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
 UNKNOWN_ID = UUID(int=404)
 
 
 def _fixed_clock() -> datetime:
-    return NOON
+    return T0
 
 
 def _ticking_clock() -> Clock:
@@ -24,7 +24,7 @@ def _ticking_clock() -> Clock:
     def clock() -> datetime:
         nonlocal ticks
         ticks += 1
-        return NOON + timedelta(minutes=ticks)
+        return T0 + timedelta(minutes=ticks)
 
     return clock
 
@@ -50,7 +50,7 @@ def test_create_strips_the_title_and_stamps_the_clock_time(service: TodoService)
 
     assert todo.title == "Buy milk"
     assert todo.done is False
-    assert todo.created_at == NOON
+    assert todo.created_at == T0
     assert service.get(todo.id) == todo
 
 
