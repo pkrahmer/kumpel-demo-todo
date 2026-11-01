@@ -1,17 +1,13 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: intake
-  started_at: '2026-11-01T13:01:49.346971Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,12 @@ journal:
   kind: started
   at: '2026-11-01T13:01:49.346971Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-11-01T13:02:10.225896Z'
+  stage: intake
+  run: c1b302391eaa4ed39515aff007089fe9
 ---
 
 # Domain model and in-memory repository
@@ -160,3 +162,9 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
 
 1. 2026-11-01 human: created.
 2. factory: started intake as demo.
+3. intake: accepted
+   Interface: names concrete modules and signatures (`app/domain/model.py`, `errors.py`, `repository.py`, `app/repository/memory.py`) and the test files. The protocol and error signatures are complete, and the test layout (a contract suite with factory and class lists) is specific enough to build.
+   Criteria: each is testable by one test function. Every Interface rule has a criterion for both sides. Strip is criterion 3. Blank is 4, with its message. Length is 5, at 1, 200 and 201 characters, with its message. UTC conversion is 6 and the naive `ValueError` is 7. `new` giving a uuid4 id and `done=False` is 1, and distinct ids are 2. `with_title` and `with_done` returning a new todo and leaving the original untouched are 8 and 9. Frozen is 10. Error messages and attributes are 11 and 12, and the hierarchy is 13. Repository add/get, duplicate, unknown id on three operations, empty list, ordering and tie-break, update, delete are 14 to 21. No inheritance is 22, and domain import purity is 23.
+   Smoke test: both commands are runnable `uv run python -c` snippets that don't use pytest, so the pytest `-q` addopts rule doesn't apply. Each `Expect:` line gives exact output lines that can be checked against the output.
+   Architecture: domain is framework-free, the repository implements the protocol structurally, and nothing imports from service or api. This matches CLAUDE.md's layering.
+   Scope: this is S0001 of F0001. There is no service, API or SQLite, and nothing from the feature's Out of scope. It matches feature decisions 1 to 4 and 15.
