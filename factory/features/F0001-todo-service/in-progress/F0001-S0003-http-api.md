@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:40:52.349871Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -117,6 +113,12 @@ journal:
   kind: started
   at: '2026-11-01T13:40:52.349871Z'
   stage: review
+- number: 20
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:41:31.175193Z'
+  stage: review
+  run: 39ac13020f634e03a6ae9694f20e08d8
 ---
 
 # HTTP API
@@ -396,3 +398,36 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 19. factory: started review as demo.
+20. reviewer: Review, round 1. I read the work item, the diff stat, the name-status list and `git diff main...HEAD -- . ':!factory' ':!docs/openapi.json'`. I went through criteria 1–25 and every rule of the Interface one at a time, then through groups 2–5.
+
+    no findings
+
+    What I checked:
+    - Group 1, acceptance criteria:
+      - Every criterion from 1 to 25 has a test in `tests/api/test_todos.py`, `tests/api/test_openapi.py` or `tests/api/test_imports.py`, and each test checks what its criterion says.
+      - Criterion 25, added last round, is `test_patch_ignores_a_null_field_beside_a_set_one`. It has two rows of one parametrized test, and in both rows the `GET` afterwards must equal the response.
+      - Each stated limit and rule is tested on both sides. Title length is tested at 200 and 201 as rows of one test. A blank title is tested on POST (2) and on PATCH (13). A body that sets no field (12) is tested against a null field beside a set one (25). A bad filter (7) is tested against valid filters (6). An id that is not a UUID (9) and an unknown id (16) are tested against a known id (8, 10, 11).
+      - The coder's `make check` was green (entry 18: 124 passed, coverage 100%).
+    - Group 2, architecture:
+      - `app.api` imports `app.service` and `app.domain` (the errors and `Todo`). Only `src/app/api/main.py` imports `app.repository`.
+      - Errors map to status codes in one place: `STATUS_BY_ERROR` and the two handlers in `src/app/api/errors.py`.
+      - Pydantic is used at the edge, and the service comes in through `Service`/`get_service` from `app.state`.
+    - Group 3, security:
+      - No secrets, and no shell or SQL built from strings.
+      - Input is validated by the schemas and by FastAPI's path and query types.
+      - Error bodies carry only the domain message or the first validation location and message.
+      - The diff adds no suppression markers.
+    - Group 4, quality:
+      - The names fit and every module has a docstring.
+      - The comments explain why: the order of the PATCH steps, and the decorator form of the handlers.
+      - `docs/openapi.json` is checked by criterion 21.
+      - The extra `service.get` in `update_todo` (`src/app/api/routes.py:31`) is a small read cost the coder noted. It is not dead code: it gives the handler a todo to return.
+    - Group 5, work item hygiene:
+      - The Description matches what was built.
+      - The journal gives the main choice (the decorator-form handlers) and what was rejected (`add_exception_handler`, and one handler for the `TodoError` base class).
+      - Docs criterion 27 still says what a reader needs.
+
+    Earlier tests:
+    - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. `_imported_modules` moved to `tests/imports.py` as `imported_modules`. For files under `app/domain` it gives the same package prefix as before. The test keeps its name and checks the same thing.
+    - `tests/service/test_todo_service.py`: changed under the same standing leave. `_ticking_clock` moved to `tests/fakes.py` as `ticking_clock`. Every test keeps its name and checks the same thing.
+    - `tests/fakes.py`: changed under the same standing leave. It is the shared place, and the only change is the added `ticking_clock`.
