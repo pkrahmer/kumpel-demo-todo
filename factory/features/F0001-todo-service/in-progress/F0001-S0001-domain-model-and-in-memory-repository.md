@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:10:44.363401Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -113,6 +117,11 @@ journal:
   at: '2026-11-01T13:10:24.321965Z'
   stage: doing
   run: fd93d9fe4aac4568a89942d71932fcaf
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:10:44.363401Z'
+  stage: tests
 ---
 
 # Domain model and in-memory repository
@@ -451,3 +460,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     - The reviewer noted that `T0` is defined in both `tests/domain/test_model.py` and `tests/repository/test_contract.py`, and that each file has a similar todo builder. Under the standing leave, the tester may move them into a shared module under `tests/`. The reviewer didn't raise this as a finding, so I'm not asking for it.
     - `docs/` still doesn't exist; criterion 26 belongs to the documenter.
     - I didn't run `make check` this round because no source changed. It was green in entry 15.
+20. factory: started tests as demo.
