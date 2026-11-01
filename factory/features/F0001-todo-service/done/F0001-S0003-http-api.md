@@ -1,5 +1,5 @@
 ---
-stage: approval
+stage: done
 blocked: null
 round: 1
 attempts: 0
@@ -141,6 +141,11 @@ journal:
   at: '2026-11-01T13:43:18.663539Z'
   stage: smoke-test
   run: 1e11806299374f718c6247cdd5fb5e16
+- number: 25
+  speaker: factory
+  kind: done
+  at: '2026-11-01T13:44:36.506437Z'
+  stage: approval
 ---
 
 # HTTP API
@@ -493,3 +498,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     Findings: none.
 
     Nothing fixed or changed. Nothing open.
+25. factory: done (pull request merged); cost: 11 runs, 6.8 min, 66 turns, 212349 tokens in (1072355 more from cache), 35504 out, $2.37
