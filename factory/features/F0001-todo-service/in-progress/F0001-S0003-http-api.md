@@ -1,5 +1,5 @@
 ---
-stage: smoke-test
+stage: approval
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: smoke-test
-  started_at: '2026-11-01T13:42:54.243434Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -139,6 +135,12 @@ journal:
   kind: started
   at: '2026-11-01T13:42:54.243434Z'
   stage: smoke-test
+- number: 24
+  speaker: smoke-tester
+  kind: result
+  at: '2026-11-01T13:43:18.663539Z'
+  stage: smoke-test
+  run: 1e11806299374f718c6247cdd5fb5e16
 ---
 
 # HTTP API
@@ -467,3 +469,27 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
     `check`: check: green
 23. factory: started smoke-test as demo.
+24. smoke-tester: I ran the `## Smoke test` block exactly as written, from the repository root, as one bash script. The server started in the background, answered within the wait loop and was stopped by the script's trap. The script exited 0 and left nothing behind in `/tmp`, and nothing was listening on port 8765 afterwards.
+
+    Output (5 lines, nothing trimmed):
+
+    ```
+    {"id":"2e3809a7-6f5f-4545-b950-df2227ad6ed6","title":"Buy milk","done":true,"created_at":"2026-11-01T13:43:08.259132Z"}
+    []
+    {"detail":"title must not be blank"}
+    204
+    {"detail":"todo 2e3809a7-6f5f-4545-b950-df2227ad6ed6 not found"}
+    ```
+
+    Result against `Expect:` — met, line by line:
+    1. PATCH `{"done":true}` returned the todo as JSON with `"title":"Buy milk"` and `"done":true`. Also checked: the POST stripped the title `"  Buy milk "` (criterion 24); the body has exactly the keys `id`, `title`, `done`, `created_at`; and `created_at` is ISO 8601 with a `Z` offset (criterion 1).
+    2. `GET /todos?done=false` returned `[]`, which is right because the only todo is completed (criterion 6).
+    3. POST with a blank title returned `{"detail":"title must not be blank"}` (criterion 2).
+    4. DELETE returned `204` (criterion 15).
+    5. GET of the deleted id returned `{"detail":"todo <same id> not found"}`, with the id in hyphenated form (criteria 15 and 16).
+
+    Acceptance criteria re-read: the output contradicts none of them. The error bodies have `detail` as their only key (criterion 20). The smoke test does not exercise criteria 26 (`make check`) or 27 (docs), and I did not judge them here because the factory runs the checks.
+
+    Findings: none.
+
+    Nothing fixed or changed. Nothing open.
