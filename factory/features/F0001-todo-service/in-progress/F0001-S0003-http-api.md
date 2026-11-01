@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: smoke-test
+  started_at: '2026-11-01T13:42:54.243434Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -130,6 +134,11 @@ journal:
   at: '2026-11-01T13:42:34.202745Z'
   stage: docs
   run: f1a2267bfba44cebb933cae03dc87ef7
+- number: 23
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:42:54.243434Z'
+  stage: smoke-test
 ---
 
 # HTTP API
@@ -457,3 +466,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     Stale text I noticed and left: the README's opening paragraph says todos are "kept in memory or in a SQLite file". SQLite storage is not built yet, so for now only memory is true. I added a sentence in Getting started saying todos are in memory, but left the intro alone. A later storage story should correct it.
 
     `check`: check: green
+23. factory: started smoke-test as demo.
