@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: review
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:40:03.442435Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -106,6 +102,12 @@ journal:
   kind: started
   at: '2026-11-01T13:40:03.442435Z'
   stage: doing
+- number: 18
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:40:32.562223Z'
+  stage: doing
+  run: f82ec623f7e949f98e2b7ed425354df1
 ---
 
 # HTTP API
@@ -372,3 +374,15 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     `lint`: lint: green (0.0 s)
     `test`: test: green (2.3 s)
 17. factory: started doing as demo.
+18. coder: Round 1 (back from the tests stage). The only finding this round was criterion 25. The tester has now added its test: `tests/api/test_todos.py::test_patch_ignores_a_null_field_beside_a_set_one`. I ran `make check` and it is green: 124 tests pass and coverage is 100%. The new test passes against the code from round 0, because `src/app/api/routes.py` already skips any field sent as `None`.
+
+    - Built: nothing new this round. I changed no code and no tests. The paths from entry 10 still apply.
+    - Main choice: I handed the work item to review unchanged. I rejected touching `src/`, because the finding was a missing test and the code already behaves as criterion 25 requires.
+    - Refactor: no change to the code since entry 10, where I already did the refactor, so there was nothing new to refactor.
+    - Description: the reviewer added criterion 25 and the closing criteria are now 26 and 27. No journal entry changed the task otherwise, so I left the Description as it is.
+    - Noticed, not touched: the same as entry 10. `PATCH` reads the todo once more before applying the changes, and the test client prints a `StarletteDeprecationWarning`, which comes from the pinned dependencies.
+
+    `check`: check: green
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
