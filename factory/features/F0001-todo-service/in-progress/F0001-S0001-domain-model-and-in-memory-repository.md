@@ -1,5 +1,5 @@
 ---
-stage: tests
+stage: doing
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: tests
-  started_at: '2026-11-01T13:02:30.334167Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -34,6 +30,12 @@ journal:
   kind: started
   at: '2026-11-01T13:02:30.334167Z'
   stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:04:08.030921Z'
+  stage: tests
+  run: 30f8ad3e34354420b18d1d7bbb462993
 ---
 
 # Domain model and in-memory repository
@@ -178,3 +180,41 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    Architecture: domain is framework-free, the repository implements the protocol structurally, and nothing imports from service or api. This matches CLAUDE.md's layering.
    Scope: this is S0001 of F0001. There is no service, API or SQLite, and nothing from the feature's Out of scope. It matches feature decisions 1 to 4 and 15.
 4. factory: started tests as demo.
+5. tester: Wrote the tests for criteria 1–23. All of them are red on purpose because the modules under test don't exist yet. `make lint` is green. I skipped the type check, as this stage says to.
+
+   Criterion → test:
+   - criterion 1: tests/domain/test_model.py::test_new_builds_an_open_todo_with_a_uuid4_id
+   - criterion 2: tests/domain/test_model.py::test_new_gives_each_todo_a_different_id
+   - criterion 3: tests/domain/test_model.py::test_title_is_stripped_of_surrounding_whitespace (rows: constructor, new, with_title)
+   - criterion 4: tests/domain/test_model.py::test_blank_title_is_rejected ("", "   ", "\n\t" × constructor, new, with_title)
+   - criterion 5: tests/domain/test_model.py::test_title_length_is_limited_to_200_characters (1, 1 padded, 200, 200 padded accepted; 201, 201 padded rejected with the message; × the three ways of building)
+   - criterion 6: tests/domain/test_model.py::test_created_at_is_converted_to_utc (constructor, new)
+   - criterion 7: tests/domain/test_model.py::test_naive_created_at_is_rejected (constructor, new)
+   - criterion 8: tests/domain/test_model.py::test_with_title_returns_a_new_todo_and_keeps_the_original
+   - criterion 9: tests/domain/test_model.py::test_with_done_returns_a_new_todo_and_keeps_the_original
+   - criterion 10: tests/domain/test_model.py::test_todo_fields_cannot_be_assigned (one row per field, setattr with the name in a variable)
+   - criterion 11: tests/domain/test_errors.py::test_todo_not_found_carries_the_id_and_names_it
+   - criterion 12: tests/domain/test_errors.py::test_duplicate_todo_carries_the_id_and_names_it
+   - criterion 13: tests/domain/test_errors.py::test_domain_errors_are_todo_errors
+   - criterion 14: tests/repository/test_contract.py::test_added_todo_can_be_read_back
+   - criterion 15: tests/repository/test_contract.py::test_adding_a_stored_id_is_rejected
+   - criterion 16: tests/repository/test_contract.py::test_unknown_id_is_not_found (rows get, update, delete). It checks `list_all() == []` in every row; for get and delete that holds trivially.
+   - criterion 17: tests/repository/test_contract.py::test_empty_repository_lists_nothing
+   - criterion 18: tests/repository/test_contract.py::test_todos_are_listed_oldest_first
+   - criterion 19: tests/repository/test_contract.py::test_todos_created_together_are_listed_by_id
+   - criterion 20: tests/repository/test_contract.py::test_update_replaces_the_stored_todo
+   - criterion 21: tests/repository/test_contract.py::test_deleted_todo_is_gone
+   - criterion 22: tests/repository/test_contract.py::test_repository_does_not_inherit_the_protocol (over `REPOSITORY_CLASSES`). The `repository` fixture is annotated `-> TodoRepository` and parametrized over `REPOSITORY_FACTORIES: list[Callable[[Path], TodoRepository]]`; it calls each factory with `tmp_path`.
+   - criterion 23: tests/domain/test_imports.py::test_domain_imports_no_framework_and_no_other_app_layer. It parses every `.py` file under src/app/domain with `ast`, resolves relative imports, and names only fastapi, pydantic, sqlalchemy and `app` modules outside `app.domain` as forbidden. It also asserts that there is at least one domain module.
+   - criteria 24 and 25 (`make check`, docs) have no tests; they belong to the coder and documenter stages.
+
+   Files created: tests/domain/__init__.py, tests/domain/test_model.py, tests/domain/test_errors.py, tests/domain/test_imports.py, tests/repository/__init__.py, tests/repository/test_contract.py.
+
+   `make test` output: 1 failed, 3 errors.
+   - Modules the test runner could not import: `app.domain.errors`, `app.domain.model`, `app.domain.repository`, `app.repository.memory`. This caused the ImportErrors at collection in test_errors.py, test_model.py and test_contract.py.
+   - The failure is test_imports.py: src/app/domain does not exist yet, so the check that at least one domain module exists fails.
+
+   Rejected: a shared conftest helper for building todos. The domain and repository modules each keep a small local builder, and no earlier test module holds a copy, so no helper was moved. Open: nothing.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 1 failed, 3 errors in 0.78s
