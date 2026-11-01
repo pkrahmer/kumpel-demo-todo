@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:38:33.029449Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -84,6 +80,12 @@ journal:
   kind: started
   at: '2026-11-01T13:38:33.029449Z'
   stage: doing
+- number: 14
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:38:48.101397Z'
+  stage: doing
+  run: 12a412f363614803b5fed96f94c13473
 ---
 
 # HTTP API
@@ -320,3 +322,16 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - `tests/service/test_todo_service.py`: changed under the same standing leave. `_ticking_clock` moved to `tests/fakes.py` as `ticking_clock`. Every test keeps its name and checks the same thing.
     - `tests/fakes.py`: changed under the same standing leave. It is the shared place, and the only change is the added `ticking_clock`.
 13. factory: started doing as demo.
+14. coder: Round 1. This round has one finding: the reviewer added criterion 25, and it needs only a test. I changed no code and no tests.
+
+    Criterion 25 for the tester: one parametrized test in `tests/api/test_todos.py` with two rows. In both rows the request is `PATCH /todos/{id}` on an open todo.
+    - `{"title": null, "done": true}` returns 200 and the todo completed, with its old title.
+    - `{"title": " New title ", "done": null}` returns 200 and the todo titled `New title`, still open.
+    - In both rows, a `GET` afterwards shows the same todo.
+
+    `tests/api/test_todos.py` has no test that sends a `null` field yet. The code needs no change: `src/app/api/routes.py` already skips a field that is `None`. When the new test is in place, the work item should pass `make check` without any change under `src/`.
+
+    Built: nothing new this round. The paths from entry 10 stay as they were.
+    - Main choice: hand the work item to the tester and change no code. I rejected changing `src/`, because the finding is about a missing test, not about how the code behaves.
+    - Description: the reviewer already added criterion 25 and renumbered the closing criteria to 26 and 27. No journal entry changed the task otherwise, so I left the Description alone.
+    - Noticed, not touched: nothing new beyond entry 10. That is the extra read in `PATCH` and the `StarletteDeprecationWarning` from the pinned dependencies.
