@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:07:24.822158Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -69,6 +73,11 @@ journal:
   at: '2026-11-01T13:07:05.124240Z'
   stage: doing
   run: b39d1f6e1720497d87d3033bb6475117
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:07:24.822158Z'
+  stage: tests
 ---
 
 # Domain model and in-memory repository
@@ -315,3 +324,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     Description: the journal did not change the meaning of the task, so `## Description` is untouched.
 
     Noticed, not touched: as in entry 7, `docs/` does not exist yet; criterion 25 belongs to the documenter. I did not run `make check` this round because nothing in the source changed; it was green in entry 7.
+12. factory: started tests as demo.
