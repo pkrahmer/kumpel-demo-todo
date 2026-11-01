@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 1
+round: 2
 attempts: 0
 crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:09:00.105153Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -100,6 +96,12 @@ journal:
   kind: started
   at: '2026-11-01T13:09:00.105153Z'
   stage: review
+- number: 17
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:09:48.846331Z'
+  stage: review
+  run: 7c16c4783bd04b74a333fc88c3d46a27
 ---
 
 # Domain model and in-memory repository
@@ -196,8 +198,9 @@ Tests: `tests/domain/test_model.py`, `tests/domain/test_errors.py`, `tests/domai
 21. `delete` removes the todo; `get` afterwards raises `TodoNotFound`.
 22. No repository class inherits the protocol: `InMemoryTodoRepository` is not a subclass of `TodoRepository` (`TodoRepository` is not in its `__mro__`; `issubclass` refuses a protocol that is not `runtime_checkable`), as a row of one parametrized test in `tests/repository/test_contract.py` over the module-level list of repository classes (here one class); and the contract suite's `repository` fixture is annotated as returning `TodoRepository`, so `make check` (mypy) proves each repository satisfies the protocol.
 23. No module in `app.domain` imports `fastapi`, `pydantic`, `sqlalchemy`, or an `app` module outside `app.domain` (a test that parses the imports of every module under `src/app/domain` and names only these forbidden ones).
-24. `make check` stays green.
-25. docs: `docs/project-guide.md` explains the layers (which may import which, and that service and repository never import each other) and the domain model (the `Todo` fields, the title rule, UTC timestamps, the three errors, the repository protocol and its ordering); the README's *Where to look next* links it.
+24. A `created_at` whose `tzinfo` gives no offset (its `utcoffset()` returns `None`) is naive too and raises `ValueError`, not `InvalidTitle`, from `Todo(...)` and `Todo.new` alike: rows of the parametrized test of criterion 7, beside the `created_at` without `tzinfo`.
+25. `make check` stays green.
+26. docs: `docs/project-guide.md` explains the layers (which may import which, and that service and repository never import each other) and the domain model (the `Todo` fields, the title rule, UTC timestamps, the three errors, the repository protocol and its ordering); the README's *Where to look next* links it.
 
 ## Smoke test
 
@@ -392,3 +395,30 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 15 dead code, in .reports/
 16. factory: started review as demo.
+17. reviewer: Round 1 review of `git diff main...HEAD -- . ':!factory'`, which has no generated or lock files to leave out, checked against the work item.
+
+    Group 1, acceptance criteria. I checked criteria 1–23 and every rule in the Interface against the tests:
+    - Strip, blank and length are each tested from the constructor, `new` and `with_title`. Length is tested at 1, 200 and 201, each also with padding.
+    - The UTC conversion is tested, and so is the naive `ValueError` with no `tzinfo`.
+    - The error messages and ids, the hierarchy, the repository contract including the empty list after a failed `update`, the order and its id tie-break, the absence of inheritance and the domain import purity all have tests.
+    - The coder's `make check` was green (entries 7 and 15).
+
+    I found one gap. The code has a behaviour that no criterion names, and I added a criterion for it:
+
+    1. criterion 24 added: it needs its test. `src/app/domain/model.py:52` (`_as_utc`) also rejects a `created_at` that has a `tzinfo` whose `utcoffset()` returns `None`.
+       - This check is not redundant, as entry 9 called it. Without it, `astimezone` would treat that datetime as local time and convert it silently.
+       - Criterion 7 and `tests/domain/test_model.py::test_naive_created_at_is_rejected` only cover a missing `tzinfo`, so deleting `or moment.utcoffset() is None` leaves every test green.
+       - Fix (the tester's): add rows to that test's parametrization, built with a `tzinfo` subclass whose `utcoffset` returns `None`, from the constructor and `new`, next to the existing no-`tzinfo` rows.
+       - No change under `src/` is needed.
+       - The old criteria 24 (`make check`) and 25 (docs) are now 25 and 26.
+
+    I stopped at group 1. Groups 2 and 3 looked clean on the way:
+    - `app.domain` imports only `app.domain` and the standard library.
+    - `app.repository.memory` imports only `app.domain` and has no base class.
+    - There are no suppression markers, no secrets and no string-built shell or SQL.
+
+    Earlier tests: none. Every test file in the diff is new (status `A`).
+
+    Notes:
+    - `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13` both define the same `T0`.
+    - `tests/repository/test_contract.py:30` (`_todo`) and `tests/domain/test_model.py:14,45` (`_from_constructor`, the `todo` fixture) build the same kind of todo. A shared module under `tests/` could hold these.
