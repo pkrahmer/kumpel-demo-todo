@@ -1,17 +1,13 @@
 ---
 stage: intake
-blocked: null
+blocked: question
 round: 0
 attempts: 0
 crashes: 0
-pull_request: null
+pull_request: 3
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: intake
-  started_at: '2026-11-01T13:29:55.457920Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -23,6 +19,13 @@ journal:
   kind: started
   at: '2026-11-01T13:29:55.457920Z'
   stage: intake
+- number: 3
+  speaker: intake
+  kind: question
+  at: '2026-11-01T13:30:26.624434Z'
+  stage: intake
+  run: 085fc987f31946dfa603100e12c56b3c
+  blocked: question
 ---
 
 # HTTP API
@@ -152,3 +155,13 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
 
 1. 2026-11-01 human: created.
 2. factory: started intake as demo.
+3. intake: Format check passed. One finding from the rule that every Interface behaviour has its own criterion:
+
+   1. The Interface says the title rule applies "after stripping" on any title the schemas receive. Criterion 11 tests stripping on PATCH, but no criterion tests it on `POST /todos`. Only the smoke test sends a padded title there, and that is not a test. Should I add a criterion such as "`POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`"? I would choose to add it, placed before the two closing criteria. I have not edited the story.
+
+   Everything else checked out:
+   - Interface: concrete modules and signatures.
+   - Criteria: each is testable by one test; the failing sides are covered (2, 3, 4, 7, 9, 12, 13, 16); the 200/201 limit is a parametrized row pair.
+   - Smoke test: runnable, and its `Expect:` line is checkable. It runs no pytest, so the `-q` rule does not apply.
+   - Architecture: the layering fits, and only `main` imports `app.repository`.
+   - Scope: within the feature, and `make openapi` exists in the Makefile.
