@@ -2,7 +2,7 @@
 
 For agents and contributors who change the code. The rules every change follows are in `CLAUDE.md`; this file explains the shape of the code and why.
 
-Only the domain and the in-memory repository exist so far. The service and the API layers described below are built by later stories.
+Only the domain, the in-memory repository and the service exist so far. The API layer described below is built by a later story.
 
 ## Layers
 
@@ -66,3 +66,26 @@ All derive from `TodoError`.
 ### Testing a repository
 
 `tests/repository/test_contract.py` is one contract suite for every repository. A new repository joins it by adding its factory (a `Callable[[Path], TodoRepository]`) to the module's list of factories and its class to the list of classes.
+
+## Service (`app/service/todo_service.py`)
+
+`TodoService(repository, clock=utc_now)` holds the use cases. It reaches storage only through the `TodoRepository` protocol and imports nothing from `app.repository` or `app.api`; `make layers` enforces this.
+
+| Method | Does |
+| --- | --- |
+| `create(title)` | Builds an open todo with `Todo.new`, stamped with the clock, stores it and returns it. |
+| `get(todo_id)` | Returns the todo. |
+| `list(*, done=None)` | Returns the todos in creation order (the repository's order). `done=True` keeps the completed ones, `done=False` the open ones, `None` all. |
+| `rename(todo_id, title)` | Returns the todo with a new title; id, done flag and `created_at` stay. |
+| `complete(todo_id)` / `reopen(todo_id)` | Return the todo with `done` true or false. Repeating either is not an error. |
+| `delete(todo_id)` | Removes the todo. |
+
+What the service owns:
+
+- **The clock.** `Clock` is `Callable[[], datetime]`. The default, `utc_now()`, returns the current time as a timezone-aware UTC datetime. Tests pass a fixed clock, or one that ticks, so that times and order are observable. Only `create` reads the clock.
+- **The done filter.** `list` calls `list_all()` and filters in memory, so the repository protocol has no filter parameter. A later SQL repository therefore loads every row before the filter applies; that is acceptable for a single user.
+- **Errors.** The title rule stays in the domain. `InvalidTitle` and `TodoNotFound` pass through unchanged, and a failed `create` or `rename` stores nothing.
+
+`rename`, `complete` and `reopen` read the todo with `get`, make the changed copy with `with_title` or `with_done`, and store it with `update`.
+
+Tests (`tests/service/test_todo_service.py`) use `InMemoryTodoRepository`. `T0`, a fixed UTC time, is shared from `tests/fakes.py`.

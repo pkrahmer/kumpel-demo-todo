@@ -1,3 +1,131 @@
+---
+stage: approval
+blocked: null
+round: 1
+attempts: 0
+crashes: 0
+pull_request: 2
+comments_read: []
+handed_over: approval
+claim: null
+journal:
+- number: 1
+  speaker: human
+  kind: created
+  at: '2026-11-01T13:18:43.285095Z'
+  stage: intake
+- number: 2
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:18:43.289282Z'
+  stage: intake
+- number: 3
+  speaker: intake
+  kind: result
+  at: '2026-11-01T13:19:00.449815Z'
+  stage: intake
+  run: c0d87f0da7bf45e2beb8c4b0ac0e2bbf
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:19:20.317843Z'
+  stage: tests
+- number: 5
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:20:06.820667Z'
+  stage: tests
+  run: 3de18135c9394c568f5a7dc3251054af
+- number: 6
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:20:26.790833Z'
+  stage: doing
+- number: 7
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:21:03.714405Z'
+  stage: doing
+  run: 8e27ef350ad64a018f3e9a7f31e86c7a
+- number: 8
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:21:23.557414Z'
+  stage: review
+- number: 9
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:22:06.088293Z'
+  stage: review
+  run: 50bce27fe1604c29add0a14836806878
+- number: 10
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:22:25.842711Z'
+  stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:22:44.159252Z'
+  stage: doing
+  run: 1b8de9c1a8904fdf8bd66caed71dc10b
+- number: 12
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:23:03.942887Z'
+  stage: tests
+- number: 13
+  speaker: tester
+  kind: result
+  at: '2026-11-01T13:23:32.782421Z'
+  stage: tests
+  run: cd2ded1be358414fa37af8447b6486b1
+- number: 14
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:23:52.628349Z'
+  stage: doing
+- number: 15
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:24:19.374721Z'
+  stage: doing
+  run: 7ef7e22aa6834ae3bac1b00e203f5972
+- number: 16
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:24:39.472269Z'
+  stage: review
+- number: 17
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:25:09.266994Z'
+  stage: review
+  run: 81bb078a67e941709b623c027f657efc
+- number: 18
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:25:29.050117Z'
+  stage: docs
+- number: 19
+  speaker: documenter
+  kind: result
+  at: '2026-11-01T13:25:58.770653Z'
+  stage: docs
+  run: 946d7d7a41c94b5c99440dc4a30b2bca
+- number: 20
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:26:18.684529Z'
+  stage: smoke-test
+- number: 21
+  speaker: smoke-tester
+  kind: result
+  at: '2026-11-01T13:26:44.054572Z'
+  stage: smoke-test
+  run: 073f7edd76a547b49072a26b57892ea6
+---
+
 # Service layer with filtering
 
 ## Description
@@ -87,3 +215,182 @@ print(svc.list())
 Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
 ## Journal
+
+1. 2026-11-01 human: created.
+2. factory: started intake as demo.
+3. intake: accepted
+   Interface: `src/app/service/todo_service.py` names `Clock`, `utc_now` and `TodoService` with typed signatures for all seven use cases. The collaborators it relies on (`TodoRepository`, `InMemoryTodoRepository`, `InvalidTitle`, `TodoNotFound`) come from S0001. I did not open the S0001 sources.
+   Criteria: each is testable by one test function. Every Interface behaviour has a criterion: the clock stamp (1), `list(done=None)` as no filter and creation order (4, 5), error propagation (2, 3, 7, 13), and `utc_now` and its default use (14, 15). Every rule has both sides: blank title rejected on create (2) and rename (7), unknown id for all four mutators (13), and complete/reopen idempotence (9, 11). The 200-character title limit is a domain rule from S0001, and the service passes its errors through unchanged, so it needs no criterion here. Criteria 16 and 17 are the two closing ones, in the right order.
+   Smoke test: both commands are plain `uv run python -c` runs and do not call pytest. Each `Expect:` line is checkable against the printed output: the three exact lines in the first, and `InvalidTitle`, `TodoNotFound`, `[]` in the second.
+   Architecture: the service depends on the repository protocol only, and tests may import the in-memory repository. This matches the layering in CLAUDE.md, and `make layers` enforces it.
+   Scope: the story covers feature decisions 5 and 17 and the feature's service-layer scope bullet. It adds no API, no persistence and no sorting beyond creation order, so it stays out of "Out of scope".
+4. factory: started tests as demo.
+5. tester: Wrote the service tests from the Interface and criteria 1–15, using `InMemoryTodoRepository` as the concrete repository. Two fixtures: a service on a fixed clock (`NOON`) and one on a clock that ticks a minute per call, used where creation order has to be visible (criteria 4 and 5).
+   criterion 1: tests/service/test_todo_service.py::test_create_strips_the_title_and_stamps_the_clock_time
+   criterion 2: tests/service/test_todo_service.py::test_create_with_a_blank_title_is_rejected_and_stores_nothing
+   criterion 3: tests/service/test_todo_service.py::test_get_with_an_unknown_id_raises_not_found
+   criterion 4: tests/service/test_todo_service.py::test_list_returns_every_todo_in_creation_order
+   criterion 5: tests/service/test_todo_service.py::test_list_filters_by_the_done_flag_in_creation_order (rows done=True, done=False, done=None over four alternately created todos)
+   criterion 6: tests/service/test_todo_service.py::test_rename_changes_only_the_title (renames a completed todo, so a reset done flag would be caught)
+   criterion 7: tests/service/test_todo_service.py::test_rename_with_a_blank_title_is_rejected_and_keeps_the_old_title
+   criterion 8: tests/service/test_todo_service.py::test_complete_marks_the_todo_done
+   criterion 9: tests/service/test_todo_service.py::test_complete_on_a_completed_todo_keeps_it_done
+   criterion 10: tests/service/test_todo_service.py::test_reopen_marks_the_todo_open
+   criterion 11: tests/service/test_todo_service.py::test_reopen_on_an_open_todo_keeps_it_open
+   criterion 12: tests/service/test_todo_service.py::test_delete_removes_the_todo
+   criterion 13: tests/service/test_todo_service.py::test_changing_an_unknown_todo_raises_not_found (rows rename, complete, reopen, delete)
+   criterion 14: tests/service/test_todo_service.py::test_utc_now_is_the_current_time_in_utc
+   criterion 15: tests/service/test_todo_service.py::test_service_without_a_clock_stamps_the_current_utc_time
+   Criteria 16 (`make check`) and 17 (docs) are not tests.
+   Files created: tests/service/__init__.py, tests/service/test_todo_service.py.
+   Module the test run could not import: `app.service.todo_service`. `make test` shows a collection ImportError for tests/service/test_todo_service.py, and the 61 earlier tests pass. `make lint` is green.
+   I did not move the `T0` constant from tests/repository/test_contract.py to a shared place. A one-line datetime value isn't a shared helper, so this file defines its own `NOON`. No earlier test files were changed.
+
+   `lint`: lint: green (0.0 s)
+   `test`: 61 passed, 1 error in 0.79s
+6. factory: started doing as demo.
+7. coder: Built the service layer: `src/app/service/__init__.py` (package docstring) and `src/app/service/todo_service.py` with `Clock`, `utc_now()` and `TodoService`. `TodoService` depends only on the `TodoRepository` protocol. It stamps `created_at` with the injected clock through `Todo.new` and filters `list(done=...)` over `list_all()`, so the list keeps the repository's creation order. `rename`, `complete` and `reopen` read the todo with `get`, build the changed copy with the domain's `with_title` / `with_done` and save it through one private `_save` (update, then return). The domain enforces the title rule, and `InvalidTitle` / `TodoNotFound` pass through unchanged. `make check` is green: 81 passed, 100% coverage.
+
+   Main choice: the service filters in memory over `list_all()`. The alternative was a `done` parameter on the repository protocol. I rejected it because it changes the S0001 protocol and contract, which is outside this story, and the filter is a use-case concern the description gives to the service. The trade-off is that a later SQL repository loads every row before filtering. Until the human asks for a filtered query, that is acceptable at single-user scale.
+
+   Refactor pass: I read the diff and found nothing to change. `_save` already removes the repeated update-and-return.
+
+   Noticed, not touched: the docs criterion (17, `docs/project-guide.md`) is the documenter's job. I wrote no route or schema, so `make openapi` was not needed. The journal did not change the meaning of the description.
+
+   `check`: check: green
+   `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
+8. factory: started review as demo.
+9. reviewer: Reviewed `git diff main...HEAD -- . ':!factory'`: `src/app/service/__init__.py`, `src/app/service/todo_service.py`, `tests/service/__init__.py` and `tests/service/test_todo_service.py`, against the work item.
+
+   Groups 1 to 3 pass.
+   - Acceptance criteria: each of criteria 1–15 has a test that checks what the criterion says. Criterion 5 is three rows over four todos created alternately on the ticking clock. Criterion 13 is four rows, and each asserts `todo_id`. The Interface rules are covered: the clock stamp (1), no filter on `done=None` (5) and creation order (4, 5). Errors pass through for a blank title on create and on rename (2, 7) and for an unknown id on every operation (3, 13). The default clock is `utc_now` (14, 15). The Interface states no limit of its own; the 200-character title rule belongs to the domain and is tested in S0001. The coder's `make check` was green (journal entry 7).
+   - Architecture: `app.service` imports only `app.domain.model` and `app.domain.repository`, and reaches storage only through the `TodoRepository` protocol.
+   - Security: there is nothing to flag, and no suppression markers were added.
+
+   Group 4 (quality) fails on the test file:
+
+   1. `tests/service/test_todo_service.py:13`: `NOON = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` is a third copy of the existing constant `T0`, which has the same value in `tests/domain/test_model.py:11` and `tests/repository/test_contract.py:13`. The tester's entry chose to keep this copy. CLAUDE.md's standing leave covers constants as well as helpers, and a second copy of an existing helper counts as a finding. Fix: the tester moves `T0` to one shared place under `tests/`, such as `tests/fakes.py` (or `tests/conftest.py`). The two earlier modules and the service tests then import it from there, and every earlier test keeps its name and what it checks.
+
+   I rejected two other possible findings:
+   - The criterion pairs 8/9 and 10/11 as separate test functions: the intake defined them as separate criteria, and each checks something different (the change and its readback, against idempotence without an error).
+   - The method name `list` shadowing the builtin: the Interface sets that name.
+
+   Group 5 was not reached because group 4 failed.
+
+   Earlier tests: none. The diff adds test files only (status `A`) and changes no test file that `main` already holds.
+10. factory: started doing as demo.
+11. coder: Round 1. The reviewer's single finding (entry 9, group 4) is in the tests, not in the code, so I changed no code and no test.
+
+    Requested change, under the standing leave in CLAUDE.md to move a shared test constant: move the constant `datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` to one shared place under `tests/`. Today it is defined three times:
+    - `T0` in `tests/domain/test_model.py:11`
+    - `T0` in `tests/repository/test_contract.py:13`
+    - `NOON` in `tests/service/test_todo_service.py:13`
+
+    There is no `tests/fakes.py` and no `tests/conftest.py` yet. A plain module constant, for example `T0` in a new `tests/fakes.py`, fits better than a fixture, since all three files use it as a module-level value. All three test modules should then import it from there, and every earlier test keeps its name and what it checks. The tester's entry names each earlier test file it changed.
+
+    Built: nothing new this round. The service layer from entry 7 (`src/app/service/__init__.py`, `src/app/service/todo_service.py`) stays as it is. The reviewer passed groups 1 to 3 on it.
+
+    Main choice: I hand this to the tester (`tests`) rather than asking the human (`question`). The rejected alternative was a `question`, which is not needed: CLAUDE.md gives standing leave for moving a shared test constant, and the coder may not make the move.
+
+    Noticed, not touched: `tests/domain/test_model.py:125` uses naive datetimes with the same date and time. That is test data for the rule that refuses times without a usable UTC offset, not a copy of the constant, so it should stay as it is. The journal did not change the meaning of the description.
+12. factory: started tests as demo.
+13. tester: Round 1, approved test change. The coder named it in entry 11, after the reviewer's finding in entry 9. I made the move under CLAUDE.md's standing leave to move a shared test helper or constant. The constant `datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` was defined three times. It now lives once, as `T0` in a new module `tests/fakes.py`. I chose a plain module constant over a fixture because all three files use it as a module-level value.
+
+    Earlier test files changed under the standing leave:
+    - `tests/domain/test_model.py`: the local `T0` is removed and the file now imports it from `tests.fakes`. The `UTC` import is dropped because nothing else in the file uses it.
+    - `tests/repository/test_contract.py`: the local `T0` is removed and the file now imports it from `tests.fakes`. The `UTC` and `datetime` imports are dropped because nothing else in the file uses them.
+    Every earlier test keeps its name and checks the same thing, since the value is identical.
+
+    This story's file:
+    - `tests/service/test_todo_service.py`: `NOON` is replaced by `T0`, imported from `tests.fakes`.
+
+    Files created: `tests/fakes.py`.
+
+    The criterion mapping is unchanged from entry 5. `make test`: 81 passed, 100% coverage. `make lint` and `make types` are green. Every module imports; nothing failed to import.
+
+    The naive datetimes at `tests/domain/test_model.py:125` are test data for the timezone rule, not a copy of the constant, so I left them as they were, as the coder suggested in entry 11.
+
+    `lint`: lint: green (0.0 s)
+    `test`: test: green (1.4 s)
+14. factory: started doing as demo.
+15. coder: Round 1, after the tester's move. The reviewer's only finding (entry 9) was the third copy of a test constant. The tester fixed it in entry 13: `T0` now lives once in `tests/fakes.py`, and `tests/domain/test_model.py`, `tests/repository/test_contract.py` and `tests/service/test_todo_service.py` import it from there. That leaves no code to change this round, and I changed none.
+
+    Built: nothing new. The service layer from entry 7 is unchanged: `src/app/service/__init__.py` and `src/app/service/todo_service.py`, with `Clock`, `utc_now` and `TodoService`.
+
+    Main choice: I hand the work item back to review without touching the code. The alternative was to look for more changes, and I rejected it: on a rework round I address only the latest findings, and those are closed.
+
+    Refactor pass: there is no new diff this round, so I had nothing to refactor.
+
+    Noticed, not touched: the docs criterion (17, `docs/project-guide.md`) is still open; it belongs to the documenter. The journal did not change the meaning of the description.
+
+    `check`: check: green (81 passed, 100% coverage)
+
+    `check`: check: green
+    `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
+16. factory: started review as demo.
+17. reviewer: Round 1 review of `git diff main...HEAD -- . ':!factory'`, read against the work item. The changed files are `src/app/service/__init__.py`, `src/app/service/todo_service.py`, `tests/fakes.py`, `tests/service/__init__.py`, `tests/service/test_todo_service.py`, `tests/domain/test_model.py` and `tests/repository/test_contract.py`.
+
+    no findings
+
+    All five groups pass:
+    - **Acceptance criteria:** I read criteria 1–15 against the tests in `tests/service/test_todo_service.py`. Each test checks what its criterion says.
+      - Criterion 5 is three rows of one parametrized test, over todos created alternately on the ticking clock.
+      - Criterion 13 is four rows, and each row asserts `todo_id`.
+      - Criterion 6 renames a completed todo and checks that the id, done flag and `created_at` are kept.
+      - Criteria 14 and 15 check the time zone, a zero offset and a gap of at most one second, through one shared assertion.
+      - The Interface rules are covered on their failing side: a blank title on create and on rename (criteria 2 and 7), and an unknown id on every operation (criteria 3 and 13). The Interface states no limit of its own; the title length belongs to the domain from S0001.
+      - The factory's `make check` after the coder was green (journal entries 7 and 15).
+    - **Architecture:** `app.service.todo_service` imports only `app.domain.model` and `app.domain.repository`, and reaches storage only through the `TodoRepository` protocol. It has no framework imports and no I/O beyond the injected clock.
+    - **Security:** nothing to flag. There is no string-built shell or SQL, and the diff adds no markers that silence a check.
+    - **Quality:** the last round's finding (entry 9: `NOON` was a third copy of `T0`) is fixed. `T0` now lives once, in `tests/fakes.py:5`, and a search of `tests/` and `src/` finds no other copy of it or of the clock helpers. The `_save` helper keeps the update-and-return step in one place. The docstrings for the module, the class and every public function in `app.service` are present and say what each does.
+    - **Work item hygiene:** the journal explains the main choice and what was rejected (entry 7: filter in the service over `list_all()`, not a `done` parameter on the protocol). The Description matches what was built. Criterion 17 still says what `docs/project-guide.md` must cover.
+
+    Earlier tests:
+    - `tests/domain/test_model.py`: changed under the standing leave in `CLAUDE.md` to move a shared test helper. Only the local `T0` and the now-unused `UTC` import were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
+    - `tests/repository/test_contract.py`: changed under the same standing leave. Only the local `T0` and the now-unused `UTC` and `datetime` imports were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
+18. factory: started docs as demo.
+19. documenter: Docs round 1. Only documents changed, so I did not run `make check`; the factory's run decides.
+
+    Files changed:
+    - `docs/project-guide.md`: added a "Service" section (criterion 17). It covers the use cases, the clock (`Clock`, `utc_now`, injectable, read only by `create`), the done filter (done in memory over `list_all()`, so the protocol has no filter and a later SQL repository loads every row first), error pass-through, and that storage is reached only through the repository protocol (`make layers`). It also notes `tests/fakes.py` and the in-memory repository in the tests. I rewrote the intro sentence that said the service did not exist yet.
+    - `README.md`: the "Where to look next" line for the project guide now lists the service.
+
+    Cross-read and found current: `CLAUDE.md` (layers, Docs, test rules) against the diff, and the layer table, domain model, errors and repository protocol sections of `docs/project-guide.md`. I ran the first smoke command and got the expected three lines. `docs/api.md`, `docs/decisions.md` and `docs/openapi.json` do not exist yet. The story adds no route or schema, so none is due.
+
+    Findings for the coder: none. The service matches the Interface, with signatures and docstrings as `CLAUDE.md` asks.
+
+    Stale text not touched: none seen. `CLAUDE.md` names `docs/api.md` and `docs/decisions.md`, which do not exist yet. That is expected before the API story.
+
+    `check`: check: green
+20. factory: started smoke-test as demo.
+21. smoke-tester: Smoke test round 1. I ran both commands under `## Smoke test` from the repository root, as written and in order. I fixed nothing.
+
+    Command 1 (create, complete, filter, rename on a fixed clock):
+    ```
+    ['Buy milk']
+    ['Write the next story']
+    Write story S0003 2026-10-04T12:00:00+00:00
+    ```
+    Exit 0. Met its `Expect:` line: these are the three expected lines, exactly.
+
+    Command 2 (blank title, unknown id, list on the default clock):
+    ```
+    InvalidTitle
+    TodoNotFound
+    []
+    ```
+    Exit 0. Met its `Expect:` line: `InvalidTitle`, then `TodoNotFound`, then `[]`.
+
+    Against the acceptance criteria, the output supports these and contradicts none:
+    - 1: the title is stripped to `Buy milk`.
+    - 2: a blank create stores nothing, and `list()` is `[]` afterwards.
+    - 5: the `done=True` and `done=False` filters return what they should.
+    - 6: rename keeps `created_at`, which is the clock's value.
+    - 8: the completed todo shows up under `done=True`.
+    - 13: `complete` with an unknown id raises `TodoNotFound`.
+    - 15: a service built without a clock works.
+    - 17: `docs/project-guide.md` has a "Service" section. It says what `TodoService` owns (the use cases, the clock, the done filter) and that it reaches storage only through the `TodoRepository` protocol. That matches the commands' behaviour.
+
+    The smoke test doesn't cover criterion 16 (`make check`). The factory runs that check itself. I didn't run it in this stage.
+
+    Findings: none.

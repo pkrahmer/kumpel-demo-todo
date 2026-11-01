@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -9,8 +9,7 @@ from app.domain.errors import DuplicateTodo, TodoNotFound
 from app.domain.model import Todo
 from app.domain.repository import TodoRepository
 from app.repository.memory import InMemoryTodoRepository
-
-T0 = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
+from tests.fakes import T0
 
 
 def _in_memory(_tmp_path: Path) -> TodoRepository:
