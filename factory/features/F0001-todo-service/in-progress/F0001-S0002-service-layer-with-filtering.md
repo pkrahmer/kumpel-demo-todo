@@ -1,5 +1,5 @@
 ---
-stage: doing
+stage: tests
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: doing
-  started_at: '2026-11-01T13:22:25.842711Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -67,6 +63,12 @@ journal:
   kind: started
   at: '2026-11-01T13:22:25.842711Z'
   stage: doing
+- number: 11
+  speaker: coder
+  kind: result
+  at: '2026-11-01T13:22:44.159252Z'
+  stage: doing
+  run: 1b8de9c1a8904fdf8bd66caed71dc10b
 ---
 
 # Service layer with filtering
@@ -222,3 +224,17 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
 
    Earlier tests: none. The diff adds test files only (status `A`) and changes no test file that `main` already holds.
 10. factory: started doing as demo.
+11. coder: Round 1. The reviewer's single finding (entry 9, group 4) is in the tests, not in the code, so I changed no code and no test.
+
+    Requested change, under the standing leave in CLAUDE.md to move a shared test constant: move the constant `datetime(2026, 10, 4, 12, 0, tzinfo=UTC)` to one shared place under `tests/`. Today it is defined three times:
+    - `T0` in `tests/domain/test_model.py:11`
+    - `T0` in `tests/repository/test_contract.py:13`
+    - `NOON` in `tests/service/test_todo_service.py:13`
+
+    There is no `tests/fakes.py` and no `tests/conftest.py` yet. A plain module constant, for example `T0` in a new `tests/fakes.py`, fits better than a fixture, since all three files use it as a module-level value. All three test modules should then import it from there, and every earlier test keeps its name and what it checks. The tester's entry names each earlier test file it changed.
+
+    Built: nothing new this round. The service layer from entry 7 (`src/app/service/__init__.py`, `src/app/service/todo_service.py`) stays as it is. The reviewer passed groups 1 to 3 on it.
+
+    Main choice: I hand this to the tester (`tests`) rather than asking the human (`question`). The rejected alternative was a `question`, which is not needed: CLAUDE.md gives standing leave for moving a shared test constant, and the coder may not make the move.
+
+    Noticed, not touched: `tests/domain/test_model.py:125` uses naive datetimes with the same date and time. That is test data for the rule that refuses times without a usable UTC offset, not a copy of the constant, so it should stay as it is. The journal did not change the meaning of the description.
