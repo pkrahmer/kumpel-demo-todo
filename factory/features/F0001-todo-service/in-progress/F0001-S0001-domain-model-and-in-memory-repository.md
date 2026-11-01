@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 1
 comments_read: []
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:02:30.334167Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -25,6 +29,11 @@ journal:
   at: '2026-11-01T13:02:10.225896Z'
   stage: intake
   run: c1b302391eaa4ed39515aff007089fe9
+- number: 4
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:02:30.334167Z'
+  stage: tests
 ---
 
 # Domain model and in-memory repository
@@ -168,3 +177,4 @@ Expect: two lines, `InvalidTitle - title must not be blank`, then `InvalidTitle 
    Smoke test: both commands are runnable `uv run python -c` snippets that don't use pytest, so the pytest `-q` addopts rule doesn't apply. Each `Expect:` line gives exact output lines that can be checked against the output.
    Architecture: domain is framework-free, the repository implements the protocol structurally, and nothing imports from service or api. This matches CLAUDE.md's layering.
    Scope: this is S0001 of F0001. There is no service, API or SQLite, and nothing from the feature's Out of scope. It matches feature decisions 1 to 4 and 15.
+4. factory: started tests as demo.
