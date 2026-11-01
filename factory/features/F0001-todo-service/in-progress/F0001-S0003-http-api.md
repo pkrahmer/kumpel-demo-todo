@@ -7,7 +7,11 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim: null
+claim:
+  instance: demo
+  stage: tests
+  started_at: '2026-11-01T13:39:08.132668Z'
+  lease_duration: 60
 journal:
 - number: 1
   speaker: human
@@ -86,6 +90,11 @@ journal:
   at: '2026-11-01T13:38:48.101397Z'
   stage: doing
   run: 12a412f363614803b5fed96f94c13473
+- number: 15
+  speaker: factory
+  kind: started
+  at: '2026-11-01T13:39:08.132668Z'
+  stage: tests
 ---
 
 # HTTP API
@@ -335,3 +344,4 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     - Main choice: hand the work item to the tester and change no code. I rejected changing `src/`, because the finding is about a missing test, not about how the code behaves.
     - Description: the reviewer already added criterion 25 and renumbered the closing criteria to 26 and 27. No journal entry changed the task otherwise, so I left the Description alone.
     - Noticed, not touched: nothing new beyond entry 10. That is the extra read in `PATCH` and the `StarletteDeprecationWarning` from the pinned dependencies.
+15. factory: started tests as demo.
