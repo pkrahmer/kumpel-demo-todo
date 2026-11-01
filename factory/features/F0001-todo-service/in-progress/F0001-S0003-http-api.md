@@ -1,5 +1,5 @@
 ---
-stage: intake
+stage: tests
 blocked: null
 round: 0
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: intake
-  started_at: '2026-11-01T13:33:01.604412Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -40,6 +36,12 @@ journal:
   kind: started
   at: '2026-11-01T13:33:01.604412Z'
   stage: intake
+- number: 6
+  speaker: intake
+  kind: result
+  at: '2026-11-01T13:33:17.776787Z'
+  stage: intake
+  run: ee508e4f74e6427a8bef18c5ef189992
 ---
 
 # HTTP API
@@ -146,8 +148,9 @@ Tests: `tests/api/test_todos.py` through FastAPI's `TestClient` against `create_
 21. `docs/openapi.json`, parsed as JSON, equals `app.openapi()` of `app.api.main.app`.
 22. The schema of `app.api.main.app` names the paths `/todos` and `/todos/{todo_id}` with the tag `todos`.
 23. Of the `app.api` modules, only `app.api.main` imports `app.repository`.
-24. `make check` stays green.
-25. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
+24. `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`.
+25. `make check` stays green.
+26. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
 
 ## Smoke test
 
@@ -181,3 +184,11 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
    - Scope: within the feature, and `make openapi` exists in the Makefile.
 4. 2026-11-01 human: Yes, as you propose: add the criterion `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`, placed before the two closing criteria. It follows from the Interface's rule that every title is checked after stripping.
 5. factory: started intake as demo.
+6. intake: accepted
+   - Interface: concrete modules and signatures (schemas, dependencies, errors, routes, app, main); the status and error tables are explicit. Every stated behaviour has a criterion, now including stripping on POST.
+   - Criteria: each is testable by one test function. Each rule has both sides: blank title (2), length 200/201 (3), missing field (4), bad filter (7), bad uuid (9), empty PATCH (12), invalid title changes nothing (13), unknown id (16). The new criterion 24 covers stripping on POST.
+   - Smoke test: runnable and runs no pytest, so the `-q` rule does not apply. The `Expect:` line gives five checkable lines.
+   - Architecture: api → service → domain. Only `app.api.main` imports `app.repository` (criterion 23), and errors are mapped in one place.
+   - Scope: within F0001's HTTP API scope, with nothing from its Out of scope. Decisions 6, 7, 9, 10, 11 and 12 are covered by criteria.
+
+   Carried in from journal entry 4 (the human's answer): I added criterion 24, "`POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`", before the two closing criteria. `make check` is now criterion 25 and `docs:` is 26. The Interface's references to criteria 21–23 are unchanged. I made no other edits.
