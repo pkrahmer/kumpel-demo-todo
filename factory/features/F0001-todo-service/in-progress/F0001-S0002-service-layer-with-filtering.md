@@ -1,5 +1,5 @@
 ---
-stage: review
+stage: docs
 blocked: null
 round: 1
 attempts: 0
@@ -7,11 +7,7 @@ crashes: 0
 pull_request: 2
 comments_read: []
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:24:39.472269Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -100,6 +96,12 @@ journal:
   kind: started
   at: '2026-11-01T13:24:39.472269Z'
   stage: review
+- number: 17
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:25:09.266994Z'
+  stage: review
+  run: 81bb078a67e941709b623c027f657efc
 ---
 
 # Service layer with filtering
@@ -304,3 +306,23 @@ Expect: three lines, `InvalidTitle`, then `TodoNotFound`, then `[]`.
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 16. factory: started review as demo.
+17. reviewer: Round 1 review of `git diff main...HEAD -- . ':!factory'`, read against the work item. The changed files are `src/app/service/__init__.py`, `src/app/service/todo_service.py`, `tests/fakes.py`, `tests/service/__init__.py`, `tests/service/test_todo_service.py`, `tests/domain/test_model.py` and `tests/repository/test_contract.py`.
+
+    no findings
+
+    All five groups pass:
+    - **Acceptance criteria:** I read criteria 1–15 against the tests in `tests/service/test_todo_service.py`. Each test checks what its criterion says.
+      - Criterion 5 is three rows of one parametrized test, over todos created alternately on the ticking clock.
+      - Criterion 13 is four rows, and each row asserts `todo_id`.
+      - Criterion 6 renames a completed todo and checks that the id, done flag and `created_at` are kept.
+      - Criteria 14 and 15 check the time zone, a zero offset and a gap of at most one second, through one shared assertion.
+      - The Interface rules are covered on their failing side: a blank title on create and on rename (criteria 2 and 7), and an unknown id on every operation (criteria 3 and 13). The Interface states no limit of its own; the title length belongs to the domain from S0001.
+      - The factory's `make check` after the coder was green (journal entries 7 and 15).
+    - **Architecture:** `app.service.todo_service` imports only `app.domain.model` and `app.domain.repository`, and reaches storage only through the `TodoRepository` protocol. It has no framework imports and no I/O beyond the injected clock.
+    - **Security:** nothing to flag. There is no string-built shell or SQL, and the diff adds no markers that silence a check.
+    - **Quality:** the last round's finding (entry 9: `NOON` was a third copy of `T0`) is fixed. `T0` now lives once, in `tests/fakes.py:5`, and a search of `tests/` and `src/` finds no other copy of it or of the clock helpers. The `_save` helper keeps the update-and-return step in one place. The docstrings for the module, the class and every public function in `app.service` are present and say what each does.
+    - **Work item hygiene:** the journal explains the main choice and what was rejected (entry 7: filter in the service over `list_all()`, not a `done` parameter on the protocol). The Description matches what was built. Criterion 17 still says what `docs/project-guide.md` must cover.
+
+    Earlier tests:
+    - `tests/domain/test_model.py`: changed under the standing leave in `CLAUDE.md` to move a shared test helper. Only the local `T0` and the now-unused `UTC` import were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
+    - `tests/repository/test_contract.py`: changed under the same standing leave. Only the local `T0` and the now-unused `UTC` and `datetime` imports were removed; `T0` is imported from `tests.fakes`. Every test keeps its name and what it checks.
