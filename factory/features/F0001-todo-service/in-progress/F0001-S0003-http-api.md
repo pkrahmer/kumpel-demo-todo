@@ -1,17 +1,13 @@
 ---
-stage: review
+stage: doing
 blocked: null
-round: 0
+round: 1
 attempts: 0
 crashes: 0
 pull_request: 3
 comments_read: [6558637547]
 handed_over: null
-claim:
-  instance: demo
-  stage: review
-  started_at: '2026-11-01T13:37:11.104448Z'
-  lease_duration: 60
+claim: null
 journal:
 - number: 1
   speaker: human
@@ -73,6 +69,12 @@ journal:
   kind: started
   at: '2026-11-01T13:37:11.104448Z'
   stage: review
+- number: 12
+  speaker: reviewer
+  kind: result
+  at: '2026-11-01T13:38:13.235363Z'
+  stage: review
+  run: e02ed2cc132e4ac5b08f286bb2d7a289
 ---
 
 # HTTP API
@@ -180,8 +182,9 @@ Tests: `tests/api/test_todos.py` through FastAPI's `TestClient` against `create_
 22. The schema of `app.api.main.app` names the paths `/todos` and `/todos/{todo_id}` with the tag `todos`.
 23. Of the `app.api` modules, only `app.api.main` imports `app.repository`.
 24. `POST /todos` with `{"title": "  Buy milk "}` returns 201 and the title `Buy milk`.
-25. `make check` stays green.
-26. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
+25. A field sent as `null` beside a set one counts as not set, as rows of one parametrized test: `PATCH /todos/{id}` on an open todo with `{"title": null, "done": true}` returns 200 and the todo completed with its old title; with `{"title": " New title ", "done": null}` it returns 200 and the todo titled `New title`, still open; a `GET` afterwards shows the same.
+26. `make check` stays green.
+27. docs: `docs/api.md` describes each endpoint (method, path, body, success and error statuses), the title rules, the error body `{"detail": "…"}` and the `PATCH` rules, with a curl example for creating and for listing; the README's *Getting started* shows how to start the server and names `/docs` for the interactive schema, and its *Where to look next* links `docs/api.md`.
 
 ## Smoke test
 
@@ -294,3 +297,16 @@ Expect: five lines: the todo as JSON with `"title":"Buy milk"` and `"done":true`
     `check`: check: green
     `duplicates`: duplicates: 0 similar code, 6 dead code, in .reports/
 11. factory: started review as demo.
+12. reviewer: Review, round 0. I read the work item, the diff stat and `git diff main...HEAD -- . ':!factory' ':!docs/openapi.json'`. Then I went through criteria 1–24 and through every rule in the Interface, one by one. Group 1 (acceptance criteria) fails because of one gap, so I stopped there, as the checklist says.
+
+    1. criterion 25 added: it needs its test. The Interface says "A field sent as `null` counts as not set". Criterion 12 tests only the refused side of that rule (every field is null, so the request gets 422). No criterion tests the accepted side: a `null` field sent beside a set one. The code already handles it: `src/app/api/routes.py:29-38` skips any field that is `None`. Without a test, a later change could break this unnoticed, for example one that reads `model_fields_set` and calls `rename(None)`. The new criterion 25 sits before the two closing criteria, which are now 26 (`make check`) and 27 (`docs:`). It has two rows of one parametrized test. `{"title": null, "done": true}` must complete the todo and keep its old title. `{"title": " New title ", "done": null}` must rename it to `New title` and leave it open. In both rows, a `GET` afterwards must show the same todo. Fix: the coder hands this to the tester, who adds the test to `tests/api/test_todos.py`. No change under `src/` is needed.
+
+    Checked and fine:
+    - Every criterion from 1 to 24 has a test named after it that tests what the criterion says.
+    - The 200/201 length limit is tested on both sides, as rows of one parametrized test.
+    - The coder's `make check` was green (entry 10).
+
+    Earlier tests:
+    - `tests/domain/test_imports.py`: changed under the standing leave to move a shared test helper. The AST import reader moved to `tests/imports.py` as `imported_modules`. For files under `app/domain` it gives the same package prefix as before. The test keeps its name and checks the same thing.
+    - `tests/service/test_todo_service.py`: changed under the same standing leave. `_ticking_clock` moved to `tests/fakes.py` as `ticking_clock`. Every test keeps its name and checks the same thing.
+    - `tests/fakes.py`: changed under the same standing leave. It is the shared place, and the only change is the added `ticking_clock`.
